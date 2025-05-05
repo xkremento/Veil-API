@@ -1,5 +1,6 @@
 package com.tfg.veilapi.service
 
+import com.tfg.veilapi.dto.CreateFriendRequestDTO
 import com.tfg.veilapi.dto.FriendRequestDTO
 import com.tfg.veilapi.dto.FriendResponseDTO
 import com.tfg.veilapi.model.FriendRequest
@@ -31,7 +32,7 @@ class FriendService(
     }
 
     @Transactional
-    fun sendFriendRequest(requestDto: FriendRequestDTO): Long {
+    fun sendFriendRequest(requestDto: CreateFriendRequestDTO): Long {
         val requester = playerService.findPlayerByEmail(requestDto.requesterId)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
 
@@ -116,7 +117,7 @@ class FriendService(
                 throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
             }
 
-            // Tomar el primer registro de amistad (o el más reciente si se necesita)
+            // Take the first friendship record (or the most recent one if needed
             val friendship = friendships.firstOrNull()
                 ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
 

@@ -1,5 +1,6 @@
 package com.tfg.veilapi.controller
 
+import com.tfg.veilapi.dto.CreateFriendRequestDTO
 import com.tfg.veilapi.dto.FriendRequestDTO
 import com.tfg.veilapi.dto.FriendResponseDTO
 import com.tfg.veilapi.service.AuthorizationService
@@ -41,7 +42,7 @@ class FriendController(
     )
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
-    fun sendFriendRequest(@RequestBody requestDto: FriendRequestDTO): Map<String, Long> {
+    fun sendFriendRequest(@RequestBody requestDto: CreateFriendRequestDTO): Map<String, Long> {
         // Ensure the current user is the one making the request
         authorizationService.validateUserAccess(requestDto.requesterId)
         val requestId = friendService.sendFriendRequest(requestDto)
