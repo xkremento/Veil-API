@@ -84,38 +84,26 @@ class LoadExampleData(
         // Create friendships (bidirectional)
         // John and Sarah are friends
         val friendship1 = Friends(
-            player = savedPlayer1,
-            friend = savedPlayer2,
-            friendshipDateTime = LocalDateTime.now().minusDays(30)
+            player = savedPlayer1, friend = savedPlayer2, friendshipDateTime = LocalDateTime.now().minusDays(30)
         )
         val friendship2 = Friends(
-            player = savedPlayer2,
-            friend = savedPlayer1,
-            friendshipDateTime = LocalDateTime.now().minusDays(30)
+            player = savedPlayer2, friend = savedPlayer1, friendshipDateTime = LocalDateTime.now().minusDays(30)
         )
 
         // John and Mike are friends
         val friendship3 = Friends(
-            player = savedPlayer1,
-            friend = savedPlayer3,
-            friendshipDateTime = LocalDateTime.now().minusDays(15)
+            player = savedPlayer1, friend = savedPlayer3, friendshipDateTime = LocalDateTime.now().minusDays(15)
         )
         val friendship4 = Friends(
-            player = savedPlayer3,
-            friend = savedPlayer1,
-            friendshipDateTime = LocalDateTime.now().minusDays(15)
+            player = savedPlayer3, friend = savedPlayer1, friendshipDateTime = LocalDateTime.now().minusDays(15)
         )
 
         // Sarah and Mike are friends
         val friendship5 = Friends(
-            player = savedPlayer2,
-            friend = savedPlayer3,
-            friendshipDateTime = LocalDateTime.now().minusDays(7)
+            player = savedPlayer2, friend = savedPlayer3, friendshipDateTime = LocalDateTime.now().minusDays(7)
         )
         val friendship6 = Friends(
-            player = savedPlayer3,
-            friend = savedPlayer2,
-            friendshipDateTime = LocalDateTime.now().minusDays(7)
+            player = savedPlayer3, friend = savedPlayer2, friendshipDateTime = LocalDateTime.now().minusDays(7)
         )
 
         // Save friendships
@@ -134,24 +122,25 @@ class LoadExampleData(
         // Create pending friend requests
         // Alex sent a request to John
         val friendRequest1 = FriendRequest(
-            requester = savedPlayer4,
-            player = savedPlayer1
+            requester = savedPlayer4, player = savedPlayer1
         )
 
         // Emma sent a request to John
         val friendRequest2 = FriendRequest(
-            requester = savedPlayer5,
-            player = savedPlayer1
+            requester = savedPlayer5, player = savedPlayer1
         )
 
         // Emma sent a request to Sarah
         val friendRequest3 = FriendRequest(
-            requester = savedPlayer5,
-            player = savedPlayer2
+            requester = savedPlayer5, player = savedPlayer2
+        )
+
+        val friendRequest4 = FriendRequest(
+            requester = savedPlayer1, player = savedPlayer2
         )
 
         // Save friend requests
-        friendRequestRepository.saveAll(listOf(friendRequest1, friendRequest2, friendRequest3))
+        friendRequestRepository.saveAll(listOf(friendRequest1, friendRequest2, friendRequest3, friendRequest4))
 
         // Create games
         val game1 = Game(
@@ -228,8 +217,7 @@ class LoadExampleData(
         // Save player-game relationships
         playerGameRepository.saveAll(
             listOf(
-                playerGame1, playerGame2, playerGame3,
-                playerGame4, playerGame5, playerGame6, playerGame7, playerGame8
+                playerGame1, playerGame2, playerGame3, playerGame4, playerGame5, playerGame6, playerGame7, playerGame8
             )
         )
 

@@ -19,6 +19,15 @@ class FriendService(
     private val playerService: PlayerService
 ) {
 
+    fun getFriendRequestById(requestId: Long): FriendRequestDTO {
+        val request = friendRequestRepository.findById(requestId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Friend request not found") }
+
+        return FriendRequestDTO(
+            friendRequestId = request.id, requesterId = request.requester.email, playerId = request.player.email
+        )
+    }
+
     fun sendFriendRequest(requestDto: FriendRequestDTO): Long {
         val requester = playerService.findPlayerByEmail(requestDto.requesterId)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
@@ -34,8 +43,7 @@ class FriendService(
         }
 
         val friendRequest = FriendRequest(
-            requester = requester,
-            player = player
+            requester = requester, player = player
         )
 
         val savedRequest = friendRequestRepository.save(friendRequest)
@@ -48,15 +56,11 @@ class FriendService(
 
         // Create friendship relations (both ways)
         val friendship1 = Friends(
-            player = request.player,
-            friend = request.requester,
-            friendshipDateTime = LocalDateTime.now()
+            player = request.player, friend = request.requester, friendshipDateTime = LocalDateTime.now()
         )
 
         val friendship2 = Friends(
-            player = request.requester,
-            friend = request.player,
-            friendshipDateTime = LocalDateTime.now()
+            player = request.requester, friend = request.player, friendshipDateTime = LocalDateTime.now()
         )
 
         // Update players' friend lists
@@ -90,9 +94,7 @@ class FriendService(
 
         return requests.map {
             FriendRequestDTO(
-                friendRequestId = it.id,
-                requesterId = it.requester.email,
-                playerId = it.player.email
+                friendRequestId = it.id, requesterId = it.requester.email, playerId = it.player.email
             )
         }
     }
