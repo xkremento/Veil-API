@@ -73,6 +73,29 @@ class FriendController(
         return friendService.acceptFriendRequest(requestId)
     }
 
+    @Operation(summary = "Decline friend request", description = "Decline a pending friend request")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "204", description = "Friend request declined successfully", content = [Content()]
+        ), ApiResponse(
+            responseCode = "404", description = "Friend request not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - Cannot decline requests for other users",
+            content = [Content()]
+        )]
+    )
+    @PostMapping("/requests/{requestId}/decline")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun declineFriendRequest(@PathVariable requestId: Long) {
+        // Here we need to verify that the current user is the recipient of the request
+        // To do this, we first retrieve the request details
+        val request = friendService.getFriendRequestById(requestId)
+        // Then we verify that the current user is the recipient
+        authorizationService.validateUserAccess(request.playerId)
+        friendService.rejectFriendRequest(requestId)
+    }
+
     @Operation(summary = "Get friend requests", description = "Get all pending friend requests for a player")
     @ApiResponses(
         value = [ApiResponse(
