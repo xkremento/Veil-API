@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface FriendsRepository : JpaRepository<Friends, Long> {
-    fun findByPlayerEmailAndFriendEmail(playerEmail: String, friendEmail: String): Friends?
+    fun findByPlayerEmailAndFriendEmail(playerEmail: String, friendEmail: String): List<Friends>
 }

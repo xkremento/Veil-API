@@ -8,11 +8,13 @@ import com.tfg.veilapi.repository.FriendRequestRepository
 import com.tfg.veilapi.repository.FriendsRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
+@Transactional(readOnly = true)
 class FriendService(
     private val friendRequestRepository: FriendRequestRepository,
     private val friendsRepository: FriendsRepository,
@@ -28,12 +30,14 @@ class FriendService(
         )
     }
 
+    @Transactional
     fun sendFriendRequest(requestDto: FriendRequestDTO): Long {
         val requester = playerService.findPlayerByEmail(requestDto.requesterId)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
 
         // Check if they're already friends
-        if (friendsRepository.findByPlayerEmailAndFriendEmail(requester.email, player.email) != null) {
+        val existingFriendship = friendsRepository.findByPlayerEmailAndFriendEmail(requester.email, player.email)
+        if (existingFriendship.isNotEmpty()) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Already friends")
         }
 
@@ -50,17 +54,19 @@ class FriendService(
         return savedRequest.id
     }
 
+    @Transactional
     fun acceptFriendRequest(requestId: Long): FriendResponseDTO {
         val request = friendRequestRepository.findById(requestId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Friend request not found") }
 
         // Create friendship relations (both ways)
+        val now = LocalDateTime.now()
         val friendship1 = Friends(
-            player = request.player, friend = request.requester, friendshipDateTime = LocalDateTime.now()
+            player = request.player, friend = request.requester, friendshipDateTime = now
         )
 
         val friendship2 = Friends(
-            player = request.requester, friend = request.player, friendshipDateTime = LocalDateTime.now()
+            player = request.requester, friend = request.player, friendshipDateTime = now
         )
 
         // Update players' friend lists
@@ -77,10 +83,11 @@ class FriendService(
         return FriendResponseDTO(
             email = request.requester.email,
             nickname = request.requester.nickname,
-            friendshipDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            friendshipDate = now.format(DateTimeFormatter.ISO_DATE_TIME)
         )
     }
 
+    @Transactional
     fun rejectFriendRequest(requestId: Long) {
         if (!friendRequestRepository.existsById(requestId)) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Friend request not found")
@@ -103,7 +110,14 @@ class FriendService(
         val player = playerService.findPlayerByEmail(playerEmail)
 
         return player.friends.map { friend ->
-            val friendship = friendsRepository.findByPlayerEmailAndFriendEmail(player.email, friend.email)
+            val friendships = friendsRepository.findByPlayerEmailAndFriendEmail(player.email, friend.email)
+
+            if (friendships.isEmpty()) {
+                throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
+            }
+
+            // Tomar el primer registro de amistad (o el más reciente si se necesita)
+            val friendship = friendships.firstOrNull()
                 ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
 
             FriendResponseDTO(
@@ -114,6 +128,7 @@ class FriendService(
         }
     }
 
+    @Transactional
     fun removeFriend(playerEmail: String, friendEmail: String) {
         val player = playerService.findPlayerByEmail(playerEmail)
         val friend = playerService.findPlayerByEmail(friendEmail)
@@ -123,10 +138,10 @@ class FriendService(
         friend.friends.remove(player)
 
         // Delete friendship records
-        val friendship1 = friendsRepository.findByPlayerEmailAndFriendEmail(player.email, friend.email)
-        val friendship2 = friendsRepository.findByPlayerEmailAndFriendEmail(friend.email, player.email)
+        val friendships1 = friendsRepository.findByPlayerEmailAndFriendEmail(player.email, friend.email)
+        val friendships2 = friendsRepository.findByPlayerEmailAndFriendEmail(friend.email, player.email)
 
-        if (friendship1 != null) friendsRepository.delete(friendship1)
-        if (friendship2 != null) friendsRepository.delete(friendship2)
+        friendships1.forEach { friendsRepository.delete(it) }
+        friendships2.forEach { friendsRepository.delete(it) }
     }
 }
