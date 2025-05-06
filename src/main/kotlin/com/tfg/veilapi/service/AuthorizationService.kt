@@ -13,7 +13,6 @@ class AuthorizationService {
      * @param requestedEmail The target email
      * @throws ResponseStatusException If unauthorized
      */
-
     fun validateUserAccess(requestedEmail: String) {
         val authentication = SecurityContextHolder.getContext().authentication
         val currentUserEmail = authentication.name
@@ -31,7 +30,6 @@ class AuthorizationService {
      * @param allowedEmails List of emails with access
      * @throws ResponseStatusException If unauthorized
      */
-
     fun validateUserIsInList(allowedEmails: List<String>) {
         val authentication = SecurityContextHolder.getContext().authentication
         val currentUserEmail = authentication.name
@@ -48,7 +46,6 @@ class AuthorizationService {
      * Retrieves the email of the currently authenticated user
      * @return The authenticated user's email
      */
-
     fun getCurrentUserEmail(): String {
         val authentication = SecurityContextHolder.getContext().authentication
         return authentication.name

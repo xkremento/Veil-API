@@ -34,18 +34,18 @@ class FriendController(
             responseCode = "404", description = "Player not found", content = [Content()]
         ), ApiResponse(
             responseCode = "409", description = "Already friends or request already sent", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Cannot send requests on behalf of other users",
-            content = [Content()]
         )]
     )
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
     fun sendFriendRequest(@RequestBody requestDto: CreateFriendRequestDTO): Map<String, Long> {
-        // Ensure the current user is the one making the request
-        authorizationService.validateUserAccess(requestDto.requesterId)
-        val requestId = friendService.sendFriendRequest(requestDto)
+        // Get the current user's email from the token and use it as the requester ID
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        // Create a new DTO with the current user's email
+        val updatedRequestDto = CreateFriendRequestDTO(
+            requesterId = currentUserEmail, playerId = requestDto.playerId
+        )
+        val requestId = friendService.sendFriendRequest(updatedRequestDto)
         return mapOf("requestId" to requestId)
     }
 
@@ -66,7 +66,6 @@ class FriendController(
     @PostMapping("/requests/{requestId}/accept")
     fun acceptFriendRequest(@PathVariable requestId: Long): FriendResponseDTO {
         // Here we need to verify that the current user is the recipient of the request
-        // To do this, we first retrieve the request details
         val request = friendService.getFriendRequestById(requestId)
         // Then we verify that the current user is the recipient
         authorizationService.validateUserAccess(request.playerId)
@@ -89,72 +88,57 @@ class FriendController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun declineFriendRequest(@PathVariable requestId: Long) {
         // Here we need to verify that the current user is the recipient of the request
-        // To do this, we first retrieve the request details
         val request = friendService.getFriendRequestById(requestId)
         // Then we verify that the current user is the recipient
         authorizationService.validateUserAccess(request.playerId)
         friendService.rejectFriendRequest(requestId)
     }
 
-    @Operation(summary = "Get friend requests", description = "Get all pending friend requests for a player")
+    @Operation(
+        summary = "Get friend requests", description = "Get all pending friend requests for the authenticated user"
+    )
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "200",
             description = "List of friend requests",
             content = [Content(array = ArraySchema(schema = Schema(implementation = FriendRequestDTO::class)))]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Cannot view requests for other users",
-            content = [Content()]
         )]
     )
-    @GetMapping("/requests/{playerEmail}")
-    fun getFriendRequests(@PathVariable playerEmail: String): List<FriendRequestDTO> {
-        // Verify that the current user is the one querying the requests
-        authorizationService.validateUserAccess(playerEmail)
-        return friendService.getFriendRequests(playerEmail)
+    @GetMapping("/requests")
+    fun getFriendRequests(): List<FriendRequestDTO> {
+        // Get the current user's email from the token
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        return friendService.getFriendRequests(currentUserEmail)
     }
 
-    @Operation(summary = "Get friends", description = "Get all friends for a player")
+    @Operation(summary = "Get friends", description = "Get all friends for the authenticated user")
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "200",
             description = "List of friends",
             content = [Content(array = ArraySchema(schema = Schema(implementation = FriendResponseDTO::class)))]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403", description = "Forbidden - Cannot view friends for other users", content = [Content()]
         )]
     )
-    @GetMapping("/{playerEmail}")
-    fun getFriends(@PathVariable playerEmail: String): List<FriendResponseDTO> {
-        // Verify that the current user is the one querying the friends
-        authorizationService.validateUserAccess(playerEmail)
-        return friendService.getFriends(playerEmail)
+    @GetMapping
+    fun getFriends(): List<FriendResponseDTO> {
+        // Get the current user's email from the token
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        return friendService.getFriends(currentUserEmail)
     }
 
-    @Operation(summary = "Remove friend", description = "Remove a friend from a player's friend list")
+    @Operation(summary = "Remove friend", description = "Remove a friend from the authenticated user's friend list")
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "204", description = "Friend removed successfully", content = [Content()]
         ), ApiResponse(
             responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Cannot modify friends for other users",
-            content = [Content()]
         )]
     )
-    @DeleteMapping("/{playerEmail}/{friendEmail}")
+    @DeleteMapping("/{friendEmail}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun removeFriend(
-        @PathVariable playerEmail: String, @PathVariable friendEmail: String
-    ) {
-        // Verify that the current user is the one removing the friendship
-        authorizationService.validateUserAccess(playerEmail)
-        friendService.removeFriend(playerEmail, friendEmail)
+    fun removeFriend(@PathVariable friendEmail: String) {
+        // Get the current user's email from the token
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        friendService.removeFriend(currentUserEmail, friendEmail)
     }
 }

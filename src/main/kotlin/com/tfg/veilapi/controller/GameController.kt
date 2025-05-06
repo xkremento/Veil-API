@@ -81,22 +81,17 @@ class GameController(
         return game
     }
 
-    @Operation(summary = "Get player games", description = "Get all games for a specific player")
+    @Operation(summary = "Get my games", description = "Get all games for the authenticated player")
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "200",
             description = "Player games retrieved successfully",
             content = [Content(array = ArraySchema(schema = Schema(implementation = GameResponseDTO::class)))]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403", description = "Forbidden - Cannot view games for other players", content = [Content()]
         )]
     )
-    @GetMapping("/player/{playerEmail}")
-    fun getPlayerGames(@PathVariable playerEmail: String): List<GameResponseDTO> {
-        // Verify that the current user is the one querying their games
-        authorizationService.validateUserAccess(playerEmail)
-        return gameService.getPlayerGames(playerEmail)
+    @GetMapping
+    fun getMyGames(): List<GameResponseDTO> {
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        return gameService.getPlayerGames(currentUserEmail)
     }
 }
