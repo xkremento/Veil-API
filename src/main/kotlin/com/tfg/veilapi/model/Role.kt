@@ -17,11 +17,14 @@ data class Role(
         if (javaClass != other?.javaClass) return false
 
         other as Role
-
         return name == other.name
     }
 
     override fun hashCode(): Int {
         return name.hashCode()
+    }
+
+    override fun toString(): String {
+        return "Role(name='$name')"
     }
 }

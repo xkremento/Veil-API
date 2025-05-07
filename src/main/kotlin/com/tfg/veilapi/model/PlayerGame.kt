@@ -18,8 +18,28 @@ data class PlayerGame(
     @JoinColumn(name = "game_id")
     val game: Game = Game(),
 
-    @Enumerated(EnumType.STRING)  // Guarda el enum como STRING en la BD
+    @Enumerated(EnumType.STRING)
     val role: GameRole = GameRole.INNOCENT,
 
     val gameDateTime: LocalDateTime = LocalDateTime.now()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PlayerGame
+
+        if (id != 0L && other.id != 0L) {
+            return id == other.id
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return if (id != 0L) id.hashCode() else System.identityHashCode(this)
+    }
+
+    override fun toString(): String {
+        return "PlayerGame(id=$id, role=$role, gameDateTime=$gameDateTime)"
+    }
+}
