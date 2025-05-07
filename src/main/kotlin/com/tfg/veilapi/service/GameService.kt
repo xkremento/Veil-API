@@ -4,6 +4,7 @@ import com.tfg.veilapi.dto.GameCreationDTO
 import com.tfg.veilapi.dto.GameResponseDTO
 import com.tfg.veilapi.dto.PlayerGameDTO
 import com.tfg.veilapi.model.Game
+import com.tfg.veilapi.model.GameRole
 import com.tfg.veilapi.model.PlayerGame
 import com.tfg.veilapi.repository.GameRepository
 import com.tfg.veilapi.repository.PlayerGameRepository
@@ -37,7 +38,7 @@ class GameService(
             PlayerGame(
                 player = player,
                 game = savedGame,
-                playerIsMurderer = email == gameDto.murdererEmail,
+                role = if (email == gameDto.murdererEmail) GameRole.MURDERER else GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now()
             )
         }
@@ -54,17 +55,14 @@ class GameService(
         val playerGames = playerGameRepository.findByGameId(game.id)
 
         return GameResponseDTO(
-            id = game.id,
-            duration = game.duration,
-            players = playerGames.map { pg ->
+            id = game.id, duration = game.duration, players = playerGames.map { pg ->
                 PlayerGameDTO(
                     playerEmail = pg.player.email,
                     playerNickname = pg.player.nickname,
-                    isMurderer = pg.playerIsMurderer,
+                    isMurderer = pg.role == GameRole.MURDERER,
                     gameDateTime = pg.gameDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
                 )
-            }
-        )
+            })
     }
 
     fun getPlayerGames(playerEmail: String): List<GameResponseDTO> {

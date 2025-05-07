@@ -49,9 +49,7 @@ class DataInitializer(
     private fun createAdminUser() {
         if (!playerRepository.existsById(adminEmail)) {
             val adminPlayer = Player(
-                email = adminEmail,
-                nickname = adminNickname,
-                password = passwordEncoder.encode(adminPassword)
+                email = adminEmail, nickname = adminNickname, password = passwordEncoder.encode(adminPassword)
             )
 
             playerRepository.save(adminPlayer)
@@ -77,12 +75,10 @@ class DataInitializer(
 
             // Don't delete admin user
             entityManager.createNativeQuery("DELETE FROM player_roles WHERE player_email != :adminEmail")
-                .setParameter("adminEmail", adminEmail)
-                .executeUpdate()
+                .setParameter("adminEmail", adminEmail).executeUpdate()
 
             entityManager.createNativeQuery("DELETE FROM player WHERE email != :adminEmail")
-                .setParameter("adminEmail", adminEmail)
-                .executeUpdate()
+                .setParameter("adminEmail", adminEmail).executeUpdate()
 
             entityManager.flush()
 
@@ -170,7 +166,11 @@ class DataInitializer(
             )
 
             // Save friendships
-            friendsRepository.saveAll(listOf(friendship1, friendship2, friendship3, friendship4, friendship5, friendship6))
+            friendsRepository.saveAll(
+                listOf(
+                    friendship1, friendship2, friendship3, friendship4, friendship5, friendship6
+                )
+            )
 
             // Flush to ensure friendships are saved
             entityManager.flush()
@@ -222,21 +222,21 @@ class DataInitializer(
             val playerGame1 = PlayerGame(
                 player = savedPlayer1,
                 game = savedGame1,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(5)
             )
 
             val playerGame2 = PlayerGame(
                 player = savedPlayer2,
                 game = savedGame1,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(5)
             )
 
             val playerGame3 = PlayerGame(
                 player = savedPlayer3,
                 game = savedGame1,
-                playerIsMurderer = true,
+                role = GameRole.MURDERER,
                 gameDateTime = LocalDateTime.now().minusDays(5)
             )
 
@@ -244,42 +244,49 @@ class DataInitializer(
             val playerGame4 = PlayerGame(
                 player = savedPlayer1,
                 game = savedGame2,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(1)
             )
 
             val playerGame5 = PlayerGame(
                 player = savedPlayer2,
                 game = savedGame2,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(1)
             )
 
             val playerGame6 = PlayerGame(
                 player = savedPlayer3,
                 game = savedGame2,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(1)
             )
 
             val playerGame7 = PlayerGame(
                 player = savedPlayer4,
                 game = savedGame2,
-                playerIsMurderer = true,
+                role = GameRole.MURDERER,
                 gameDateTime = LocalDateTime.now().minusDays(1)
             )
 
             val playerGame8 = PlayerGame(
                 player = savedPlayer5,
                 game = savedGame2,
-                playerIsMurderer = false,
+                role = GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now().minusDays(1)
             )
 
             // Save player-game relationships
             playerGameRepository.saveAll(
                 listOf(
-                    playerGame1, playerGame2, playerGame3, playerGame4, playerGame5, playerGame6, playerGame7, playerGame8
+                    playerGame1,
+                    playerGame2,
+                    playerGame3,
+                    playerGame4,
+                    playerGame5,
+                    playerGame6,
+                    playerGame7,
+                    playerGame8
                 )
             )
 

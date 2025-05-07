@@ -4,12 +4,10 @@ import jakarta.persistence.*
 import lombok.EqualsAndHashCode
 import java.time.LocalDateTime
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, exclude = ["player", "game"])
 @Entity
 data class PlayerGame(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     val id: Long = 0,
 
     @ManyToOne
@@ -20,7 +18,8 @@ data class PlayerGame(
     @JoinColumn(name = "game_id")
     val game: Game = Game(),
 
-    val playerIsMurderer: Boolean = false,
+    @Enumerated(EnumType.STRING)  // Guarda el enum como STRING en la BD
+    val role: GameRole = GameRole.INNOCENT,
 
     val gameDateTime: LocalDateTime = LocalDateTime.now()
 )

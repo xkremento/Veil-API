@@ -94,8 +94,7 @@ class PlayerService(
         val updatedPlayer = player.copy(
             nickname = updateDto.nickname ?: player.nickname,
             password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password,
-            skinUrl = updateDto.skinUrl ?: player.skinUrl
-        )
+            skinUrl = updateDto.skinUrl ?: player.skinUrl)
 
         val savedPlayer = playerRepository.save(updatedPlayer)
         return convertToResponseDTO(savedPlayer)
@@ -140,10 +139,7 @@ class PlayerService(
 
     fun convertToResponseDTO(player: Player): PlayerResponseDTO {
         return PlayerResponseDTO(
-            email = player.email,
-            nickname = player.nickname,
-            coins = player.coins,
-            skinUrl = player.skinUrl
+            email = player.email, nickname = player.nickname, coins = player.coins, skinUrl = player.skinUrl
         )
     }
 }

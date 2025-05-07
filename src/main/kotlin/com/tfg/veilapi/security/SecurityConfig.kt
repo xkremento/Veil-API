@@ -20,18 +20,12 @@ class SecurityConfig(private val jwtRequestFilter: JwtRequestFilter) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .csrf { it.disable() }
-            .authorizeHttpRequests { auth ->
-                auth
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**").permitAll()
-                    .requestMatchers("/swagger-ui/**").permitAll()
-                    .requestMatchers("/swagger-ui.html").permitAll()
+        http.csrf { it.disable() }.authorizeHttpRequests { auth ->
+                auth.requestMatchers("/api/auth/**").permitAll().requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll().requestMatchers("/swagger-ui.html").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN") // New endpoint for administrators
                     .anyRequest().authenticated()
-            }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            }.sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
