@@ -18,7 +18,7 @@ class PlayerService(
     private val roleService: RoleService
 ) {
     companion object {
-        const val MAX_COINS = 999999 // Límite máximo de 6 cifras
+        const val MAX_COINS = 999999 // Maximum limit of 6 digits
     }
 
     @Transactional
@@ -34,14 +34,14 @@ class PlayerService(
             skinUrl = playerDto.skinUrl
         )
 
-        // Añadir rol USER por defecto
+        // Add USER role by default
         player.roles.add(roleService.findByName("USER"))
 
         val savedPlayer = playerRepository.save(player)
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Método para añadir el rol de administrador a un jugador
+    // Method to add admin role to a player
     @Transactional
     fun addAdminRole(email: String): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
@@ -50,7 +50,7 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Método para quitar el rol de administrador de un jugador
+    // Method to remove admin role from a player
     @Transactional
     fun removeAdminRole(email: String): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
@@ -59,7 +59,7 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Método para admins para añadir monedas a cualquier jugador
+    // Method for admins to add coins to any player
     @Transactional
     fun adminAddCoinsToPlayer(playerEmail: String, amount: Int): PlayerResponseDTO {
         val player = findPlayerByEmail(playerEmail)
@@ -101,8 +101,8 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Método original para añadir monedas - mantenido para posibles usos internos
-    // pero no expuesto a través de endpoints públicos
+    // Original method to add coins - kept for potential internal use
+    // but not exposed through public endpoints
     @Transactional
     protected fun addCoinsToPlayer(email: String, amount: Int): PlayerResponseDTO {
         val player = findPlayerByEmail(email)

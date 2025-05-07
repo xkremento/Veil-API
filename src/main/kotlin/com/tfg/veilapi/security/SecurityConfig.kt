@@ -28,7 +28,7 @@ class SecurityConfig(private val jwtRequestFilter: JwtRequestFilter) {
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers("/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN") // Nuevo endpoint para administradores
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN") // New endpoint for administrators
                     .anyRequest().authenticated()
             }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
