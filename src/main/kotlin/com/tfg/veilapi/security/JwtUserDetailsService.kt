@@ -1,11 +1,13 @@
 package com.tfg.veilapi.security
 
 import com.tfg.veilapi.repository.PlayerRepository
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
+import java.util.stream.Collectors
 
 @Service
 class JwtUserDetailsService(private val playerRepository: PlayerRepository) : UserDetailsService {
@@ -13,10 +15,21 @@ class JwtUserDetailsService(private val playerRepository: PlayerRepository) : Us
     override fun loadUserByUsername(username: String): UserDetails {
         val player = playerRepository.findById(username)
             .orElseThrow { UsernameNotFoundException("User not found with email: $username") }
+
+        // Convertir roles a authorities
+        val authorities = player.roles.stream()
+            .map { role -> SimpleGrantedAuthority("ROLE_${role.name}") }
+            .collect(Collectors.toList())
+
+        // Si no tiene roles, añadir el rol por defecto USER
+        if (authorities.isEmpty()) {
+            authorities.add(SimpleGrantedAuthority("ROLE_USER"))
+        }
+
         return User.builder()
             .username(player.email)
             .password(player.password)
-            .roles("USER")
+            .authorities(authorities)
             .build()
     }
 }

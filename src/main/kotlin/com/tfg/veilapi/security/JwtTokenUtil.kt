@@ -26,7 +26,12 @@ class JwtTokenUtil {
     }
 
     fun generateToken(userDetails: UserDetails): String {
-        val claims: Map<String, Any> = hashMapOf()
+        val claims: MutableMap<String, Any> = HashMap()
+
+        // Añadir los roles al token
+        val roles = userDetails.authorities.map { it.authority }.toList()
+        claims["roles"] = roles
+
         return createToken(claims, userDetails.username)
     }
 
@@ -56,6 +61,12 @@ class JwtTokenUtil {
     fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T {
         val claims = extractAllClaims(token)
         return claimsResolver(claims)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun extractRoles(token: String): List<String> {
+        val claims = extractAllClaims(token)
+        return claims["roles"] as? List<String> ?: emptyList()
     }
 
     private fun extractAllClaims(token: String): Claims {

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import lombok.EqualsAndHashCode
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, exclude = ["friends", "sentFriendRequests", "receivedFriendRequests", "playerGames"])
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, exclude = ["friends", "sentFriendRequests", "receivedFriendRequests", "playerGames", "roles"])
 @Entity
 data class Player(
     @Id
@@ -42,7 +42,15 @@ data class Player(
     val receivedFriendRequests: MutableSet<FriendRequest> = mutableSetOf(),
 
     @OneToMany(mappedBy = "player", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val playerGames: MutableSet<PlayerGame> = mutableSetOf()
+    val playerGames: MutableSet<PlayerGame> = mutableSetOf(),
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "player_roles",
+        joinColumns = [JoinColumn(name = "player_email")],
+        inverseJoinColumns = [JoinColumn(name = "role_name")]
+    )
+    val roles: MutableSet<Role> = mutableSetOf()
 ) {
     override fun toString(): String {
         return "Player(email='$email', nickname='$nickname', coins=$coins, skinUrl=$skinUrl)"
