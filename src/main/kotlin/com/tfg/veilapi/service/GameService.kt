@@ -38,6 +38,7 @@ class GameService(
             PlayerGame(
                 player = player,
                 game = savedGame,
+                // Usar el enum GameRole en lugar de un booleano
                 role = if (email == gameDto.murdererEmail) GameRole.MURDERER else GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now()
             )
@@ -59,6 +60,7 @@ class GameService(
                 PlayerGameDTO(
                     playerEmail = pg.player.email,
                     playerNickname = pg.player.nickname,
+                    // Convert enum to boolean
                     isMurderer = pg.role == GameRole.MURDERER,
                     gameDateTime = pg.gameDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
                 )
