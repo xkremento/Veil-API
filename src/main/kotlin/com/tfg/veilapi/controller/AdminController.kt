@@ -2,6 +2,7 @@ package com.tfg.veilapi.controller
 
 import com.tfg.veilapi.dto.AddCoinsDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
+import com.tfg.veilapi.dto.UpdateSkinDTO
 import com.tfg.veilapi.service.PlayerService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/admin")
 @Tag(name = "Admin", description = "Admin operations API")
 @SecurityRequirement(name = "bearerAuth")
-@PreAuthorize("hasRole('ADMIN')")  // Asegura que toda la clase requiere rol ADMIN
+@PreAuthorize("hasRole('ADMIN')")
 class AdminController(private val playerService: PlayerService) {
 
     @Operation(summary = "Get player details by email", description = "Retrieves player information by email (admin only)")
@@ -77,6 +79,26 @@ class AdminController(private val playerService: PlayerService) {
     @PostMapping("/players/{email}/roles/admin")
     fun addAdminRole(@PathVariable email: String): PlayerResponseDTO {
         return playerService.addAdminRole(email)
+    }
+
+    @Operation(summary = "Update player skin", description = "Updates a player's skin URL (admin only)")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Skin updated successfully",
+            content = [Content(schema = Schema(implementation = PlayerResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Player not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
+        )]
+    )
+    @PutMapping("/players/{email}/skin")
+    fun updatePlayerSkin(
+        @PathVariable email: String,
+        @Valid @RequestBody updateSkinDTO: UpdateSkinDTO
+    ): PlayerResponseDTO {
+        return playerService.adminUpdatePlayerSkin(email, updateSkinDTO.skinUrl)
     }
 
     @Operation(summary = "Remove admin role", description = "Removes admin role from a player (admin only)")

@@ -142,4 +142,16 @@ class PlayerService(
             email = player.email, nickname = player.nickname, coins = player.coins, skinUrl = player.skinUrl
         )
     }
+
+    @Transactional
+    fun adminUpdatePlayerSkin(email: String, skinUrl: String): PlayerResponseDTO {
+        val player = findPlayerByEmail(email)
+
+        val updatedPlayer = player.copy(
+            skinUrl = skinUrl
+        )
+
+        val savedPlayer = playerRepository.save(updatedPlayer)
+        return convertToResponseDTO(savedPlayer)
+    }
 }
