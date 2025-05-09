@@ -6,20 +6,13 @@ import java.time.LocalDateTime
 
 @Entity
 data class PlayerGame(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long = 0,
 
-    @ManyToOne
-    @JoinColumn(name = "player_email")
-    val player: Player = Player(),
+    @ManyToOne @JoinColumn(name = "player_email") val player: Player = Player(),
 
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    val game: Game = Game(),
+    @ManyToOne @JoinColumn(name = "game_id") val game: Game = Game(),
 
-    @Enumerated(EnumType.STRING)
-    val role: GameRole = GameRole.INNOCENT,
+    @Enumerated(EnumType.STRING) val role: GameRole = GameRole.INNOCENT,
 
     val gameDateTime: LocalDateTime = LocalDateTime.now()
 ) {

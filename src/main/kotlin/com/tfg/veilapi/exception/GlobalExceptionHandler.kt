@@ -50,6 +50,7 @@ class GlobalExceptionHandler {
                     else -> sqlEx.message ?: "Database constraint violation"
                 }
             }
+
             else -> "Database integrity constraint violation"
         }
 
@@ -75,8 +76,5 @@ class GlobalExceptionHandler {
 }
 
 data class ErrorResponse(
-    val timestamp: String,
-    val status: Int,
-    val error: String,
-    val message: String
+    val timestamp: String, val status: Int, val error: String, val message: String
 )

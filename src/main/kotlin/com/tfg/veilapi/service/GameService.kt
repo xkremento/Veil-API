@@ -28,17 +28,14 @@ class GameService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Murderer must be one of the players")
         }
 
-        // Create game
         val game = Game(duration = gameDto.duration)
         val savedGame = gameRepository.save(game)
 
-        // Add players to game
         val playerGames = gameDto.playerEmails.map { email ->
             val player = playerService.findPlayerByEmail(email)
             PlayerGame(
                 player = player,
                 game = savedGame,
-                // Usar el enum GameRole en lugar de un booleano
                 role = if (email == gameDto.murdererEmail) GameRole.MURDERER else GameRole.INNOCENT,
                 gameDateTime = LocalDateTime.now()
             )

@@ -5,5 +5,6 @@ data class PlayerResponseWithRolesDTO(
     val nickname: String,
     val coins: Int,
     val skinUrl: String?,
+    val profileImageUrl: String?,
     val roles: Set<String>
 )

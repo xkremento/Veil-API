@@ -43,7 +43,7 @@ class GameController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createGame(@RequestBody gameDto: GameCreationDTO): GameResponseDTO {
-        // Verify that the current user is included in the game players
+
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         if (!gameDto.playerEmails.contains(currentUserEmail)) {
             throw ResponseStatusException(
@@ -70,7 +70,7 @@ class GameController(
     @GetMapping("/{gameId}")
     fun getGame(@PathVariable gameId: Long): GameResponseDTO {
         val game = gameService.getGame(gameId)
-        // Verify that the current user is one of the players
+
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         val playerEmails = game.players.map { it.playerEmail }
         if (!playerEmails.contains(currentUserEmail)) {

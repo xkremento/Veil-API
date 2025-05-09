@@ -12,14 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class JwtRequestFilter(
-    private val userDetailsService: JwtUserDetailsService,
-    private val jwtTokenUtil: JwtTokenUtil
+    private val userDetailsService: JwtUserDetailsService, private val jwtTokenUtil: JwtTokenUtil
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        chain: FilterChain
+        request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain
     ) {
         val authorizationHeader = request.getHeader("Authorization")
         var username: String? = null

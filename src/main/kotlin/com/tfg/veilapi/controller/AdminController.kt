@@ -2,6 +2,7 @@ package com.tfg.veilapi.controller
 
 import com.tfg.veilapi.dto.AddCoinsDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
+import com.tfg.veilapi.dto.ProfileImageDTO
 import com.tfg.veilapi.dto.UpdateSkinDTO
 import com.tfg.veilapi.service.PlayerService
 import io.swagger.v3.oas.annotations.Operation
@@ -26,7 +27,9 @@ import org.springframework.web.server.ResponseStatusException
 @PreAuthorize("hasRole('ADMIN')")
 class AdminController(private val playerService: PlayerService) {
 
-    @Operation(summary = "Get player details by email", description = "Retrieves player information by email (admin only)")
+    @Operation(
+        summary = "Get player details by email", description = "Retrieves player information by email (admin only)"
+    )
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "200",
@@ -52,17 +55,14 @@ class AdminController(private val playerService: PlayerService) {
         ), ApiResponse(
             responseCode = "404", description = "Player not found", content = [Content()]
         ), ApiResponse(
-            responseCode = "400",
-            description = "Invalid amount or exceeds maximum coin limit",
-            content = [Content()]
+            responseCode = "400", description = "Invalid amount or exceeds maximum coin limit", content = [Content()]
         ), ApiResponse(
             responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
         )]
     )
     @PostMapping("/players/{email}/coins")
     fun addCoinsToPlayer(
-        @PathVariable email: String,
-        @RequestBody addCoinsDTO: AddCoinsDTO
+        @PathVariable email: String, @RequestBody addCoinsDTO: AddCoinsDTO
     ): PlayerResponseDTO {
         return playerService.adminAddCoinsToPlayer(email, addCoinsDTO.amount)
     }
@@ -98,8 +98,7 @@ class AdminController(private val playerService: PlayerService) {
     )
     @PutMapping("/players/{email}/skin")
     fun updatePlayerSkin(
-        @PathVariable email: String,
-        @Valid @RequestBody updateSkinDTO: UpdateSkinDTO
+        @PathVariable email: String, @Valid @RequestBody updateSkinDTO: UpdateSkinDTO
     ): PlayerResponseDTO {
         return playerService.adminUpdatePlayerSkin(email, updateSkinDTO.skinUrl)
     }
@@ -118,10 +117,8 @@ class AdminController(private val playerService: PlayerService) {
     )
     @PutMapping("/players/{email}/nickname")
     fun updatePlayerNickname(
-        @PathVariable email: String,
-        @RequestBody @Valid nicknameDto: Map<String, @Valid @Pattern(
-            regexp = "^[a-zA-Z0-9_]+$",
-            message = "Nickname can only contain letters, numbers and underscores"
+        @PathVariable email: String, @RequestBody @Valid nicknameDto: Map<String, @Valid @Pattern(
+            regexp = "^[a-zA-Z0-9_]+$", message = "Nickname can only contain letters, numbers and underscores"
         ) @Size(
             min = 3, max = 30, message = "Nickname must be between 3 and 30 characters"
         ) String>
@@ -130,6 +127,25 @@ class AdminController(private val playerService: PlayerService) {
             HttpStatus.BAD_REQUEST, "Nickname is required"
         )
         return playerService.adminUpdateNickname(email, nickname)
+    }
+
+    @Operation(summary = "Update player profile image", description = "Updates a player's profile image (admin only)")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Profile image updated successfully",
+            content = [Content(schema = Schema(implementation = PlayerResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Player not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
+        )]
+    )
+    @PutMapping("/players/{email}/profile-image")
+    fun updatePlayerProfileImage(
+        @PathVariable email: String, @Valid @RequestBody profileImageDTO: ProfileImageDTO
+    ): PlayerResponseDTO {
+        return playerService.adminUpdatePlayerProfileImage(email, profileImageDTO.profileImageUrl)
     }
 
     @Operation(summary = "Remove admin role", description = "Removes admin role from a player (admin only)")

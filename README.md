@@ -23,8 +23,9 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - Role-based authorization (User/Admin)
 
 ### Player Management
-- Create and update player profiles
-- Customize player skins
+- Player profiles with customizable profile images
+- Secure password management
+- Skin customization (admin-only feature)
 - In-game virtual currency system
 - View player details and statistics
 
@@ -42,8 +43,10 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 
 ### Admin Functionality
 - Manage player roles (promote/demote admins)
+- Update player nicknames and skins
 - Add coins to player accounts
 - View detailed player information
+- Update profile images for any player
 
 ## API Endpoints
 
@@ -53,7 +56,8 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 
 ### Player Endpoints
 - `GET /api/players/me` - Get current player details
-- `PUT /api/players` - Update player information
+- `PUT /api/players/password` - Update player password
+- `PUT /api/players/profile-image` - Update player profile image
 - `DELETE /api/players` - Delete player account
 
 ### Friends Endpoints
@@ -75,6 +79,9 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - `POST /api/admin/players/{email}/roles/admin` - Assign admin role
 - `DELETE /api/admin/players/{email}/roles/admin` - Remove admin role
 - `PUT /api/admin/players/{email}/skin` - Update a player's skin URL
+- `PUT /api/admin/players/{email}/nickname` - Update a player's nickname
+- `PUT /api/admin/players/{email}/profile-image` - Update a player's profile image
+
 ## Documentation
 
 The API is fully documented using Swagger/OpenAPI. When running the application, you can access the interactive API documentation at:
@@ -91,6 +98,8 @@ Security is a top priority for this API:
 - JWT tokens for authentication with configurable expiration time
 - Role-based access control for endpoints
 - Password encryption using BCrypt
+- Restricted player data modification (users can only change their password and profile image)
+- Admin-only operations for sensitive data updates
 - Input validation on all endpoints
 - Protection against SQL injection and XSS attacks
 - CORS configuration for secure cross-origin requests

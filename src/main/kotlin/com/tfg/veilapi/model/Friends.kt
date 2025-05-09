@@ -7,17 +7,11 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "friends")
 data class Friends(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long = 0,
 
-    @ManyToOne
-    @JoinColumn(name = "player_email")
-    val player: Player = Player(),
+    @ManyToOne @JoinColumn(name = "player_email") val player: Player = Player(),
 
-    @ManyToOne
-    @JoinColumn(name = "friend_email")
-    val friend: Player = Player(),
+    @ManyToOne @JoinColumn(name = "friend_email") val friend: Player = Player(),
 
     val friendshipDateTime: LocalDateTime = LocalDateTime.now()
 ) {

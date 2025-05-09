@@ -5,14 +5,15 @@ import lombok.EqualsAndHashCode
 
 @Entity
 data class Game(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long = 0,
 
     val duration: Int = 0,
 
-    @OneToMany(mappedBy = "game", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val playerGames: MutableSet<PlayerGame> = mutableSetOf()
+    @OneToMany(
+        mappedBy = "game",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    ) val playerGames: MutableSet<PlayerGame> = mutableSetOf()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -23,7 +24,7 @@ data class Game(
         if (id != 0L && other.id != 0L) {
             return id == other.id
         }
-        return false  // Consideramos entidades sin ID persistido como diferentes
+        return false
     }
 
     override fun hashCode(): Int {

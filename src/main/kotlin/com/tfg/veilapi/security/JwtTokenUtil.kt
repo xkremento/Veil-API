@@ -36,13 +36,8 @@ class JwtTokenUtil {
     }
 
     private fun createToken(claims: Map<String, Any>, subject: String): String {
-        return Jwts.builder()
-            .claims(claims)
-            .subject(subject)
-            .issuedAt(Date(System.currentTimeMillis()))
-            .expiration(Date(System.currentTimeMillis() + expiration * 1000))
-            .signWith(getSigningKey())
-            .compact()
+        return Jwts.builder().claims(claims).subject(subject).issuedAt(Date(System.currentTimeMillis()))
+            .expiration(Date(System.currentTimeMillis() + expiration * 1000)).signWith(getSigningKey()).compact()
     }
 
     fun validateToken(token: String, userDetails: UserDetails): Boolean {
@@ -70,11 +65,7 @@ class JwtTokenUtil {
     }
 
     private fun extractAllClaims(token: String): Claims {
-        return Jwts.parser()
-            .verifyWith(getSigningKey() as SecretKey)
-            .build()
-            .parseSignedClaims(token)
-            .payload
+        return Jwts.parser().verifyWith(getSigningKey() as SecretKey).build().parseSignedClaims(token).payload
     }
 
     private fun isTokenExpired(token: String): Boolean {

@@ -39,9 +39,8 @@ class FriendController(
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
     fun sendFriendRequest(@RequestBody requestDto: CreateFriendRequestDTO): Map<String, Long> {
-        // Get the current user's email from the token and use it as the requester ID
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        // Create a new DTO with the current user's email
+
         val updatedRequestDto = CreateFriendRequestDTO(
             requesterId = currentUserEmail, playerId = requestDto.playerId
         )
@@ -65,9 +64,9 @@ class FriendController(
     )
     @PostMapping("/requests/{requestId}/accept")
     fun acceptFriendRequest(@PathVariable requestId: Long): FriendResponseDTO {
-        // Here we need to verify that the current user is the recipient of the request
+
         val request = friendService.getFriendRequestById(requestId)
-        // Then we verify that the current user is the recipient
+
         authorizationService.validateUserAccess(request.playerId)
         return friendService.acceptFriendRequest(requestId)
     }
@@ -87,9 +86,9 @@ class FriendController(
     @PostMapping("/requests/{requestId}/decline")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun declineFriendRequest(@PathVariable requestId: Long) {
-        // Here we need to verify that the current user is the recipient of the request
+
         val request = friendService.getFriendRequestById(requestId)
-        // Then we verify that the current user is the recipient
+
         authorizationService.validateUserAccess(request.playerId)
         friendService.rejectFriendRequest(requestId)
     }
@@ -106,7 +105,7 @@ class FriendController(
     )
     @GetMapping("/requests")
     fun getFriendRequests(): List<FriendRequestDTO> {
-        // Get the current user's email from the token
+
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         return friendService.getFriendRequests(currentUserEmail)
     }
@@ -121,7 +120,7 @@ class FriendController(
     )
     @GetMapping
     fun getFriends(): List<FriendResponseDTO> {
-        // Get the current user's email from the token
+
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         return friendService.getFriends(currentUserEmail)
     }
@@ -137,7 +136,7 @@ class FriendController(
     @DeleteMapping("/{friendEmail}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeFriend(@PathVariable friendEmail: String) {
-        // Get the current user's email from the token
+
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         friendService.removeFriend(currentUserEmail, friendEmail)
     }

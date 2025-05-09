@@ -36,13 +36,11 @@ class FriendService(
         val requester = playerService.findPlayerByEmail(requestDto.requesterId)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
 
-        // Check if they're already friends
         val existingFriendship = friendsRepository.findByPlayerEmailAndFriendEmail(requester.email, player.email)
         if (existingFriendship.isNotEmpty()) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Already friends")
         }
 
-        // Check if request already exists
         if (friendRequestRepository.findByRequesterEmailAndPlayerEmail(requester.email, player.email) != null) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Friend request already sent")
         }
@@ -60,7 +58,6 @@ class FriendService(
         val request = friendRequestRepository.findById(requestId)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Friend request not found") }
 
-        // Create friendship relations (both ways)
         val now = LocalDateTime.now()
         val friendship1 = Friends(
             player = request.player, friend = request.requester, friendshipDateTime = now
@@ -70,15 +67,12 @@ class FriendService(
             player = request.requester, friend = request.player, friendshipDateTime = now
         )
 
-        // Update players' friend lists
         request.player.friends.add(request.requester)
         request.requester.friends.add(request.player)
 
-        // Save friendships
         friendsRepository.save(friendship1)
         friendsRepository.save(friendship2)
 
-        // Delete request
         friendRequestRepository.delete(request)
 
         return FriendResponseDTO(
@@ -117,7 +111,6 @@ class FriendService(
                 throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
             }
 
-            // Take the first friendship record (or the most recent one if needed
             val friendship = friendships.firstOrNull()
                 ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
 
@@ -134,11 +127,9 @@ class FriendService(
         val player = playerService.findPlayerByEmail(playerEmail)
         val friend = playerService.findPlayerByEmail(friendEmail)
 
-        // Remove from both players' friend lists
         player.friends.remove(friend)
         friend.friends.remove(player)
 
-        // Delete friendship records
         val friendships1 = friendsRepository.findByPlayerEmailAndFriendEmail(player.email, friend.email)
         val friendships2 = friendsRepository.findByPlayerEmailAndFriendEmail(friend.email, player.email)
 

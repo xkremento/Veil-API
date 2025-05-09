@@ -3,6 +3,7 @@ package com.tfg.veilapi.controller
 import com.tfg.veilapi.dto.PasswordUpdateDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
 import com.tfg.veilapi.dto.PlayerUpdateDTO
+import com.tfg.veilapi.dto.ProfileImageDTO
 import com.tfg.veilapi.service.AuthorizationService
 import com.tfg.veilapi.service.PlayerService
 import io.swagger.v3.oas.annotations.Operation
@@ -54,6 +55,22 @@ class PlayerController(
     fun changePassword(@Valid @RequestBody passwordUpdateDTO: PasswordUpdateDTO): PlayerResponseDTO {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         return playerService.changePassword(currentUserEmail, passwordUpdateDTO.password)
+    }
+
+    @Operation(summary = "Update profile image", description = "Updates the authenticated player's profile image")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Profile image updated successfully",
+            content = [Content(schema = Schema(implementation = PlayerResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Player not found", content = [Content()]
+        )]
+    )
+    @PutMapping("/profile-image")
+    fun updateProfileImage(@Valid @RequestBody profileImageDTO: ProfileImageDTO): PlayerResponseDTO {
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        return playerService.updateProfileImage(currentUserEmail, profileImageDTO.profileImageUrl)
     }
 
     @Operation(summary = "Delete current player", description = "Deletes authenticated player account")

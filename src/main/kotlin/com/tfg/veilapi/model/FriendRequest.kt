@@ -5,17 +5,11 @@ import lombok.EqualsAndHashCode
 
 @Entity
 data class FriendRequest(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Long = 0,
 
-    @ManyToOne
-    @JoinColumn(name = "requester_email")
-    val requester: Player = Player(),
+    @ManyToOne @JoinColumn(name = "requester_email") val requester: Player = Player(),
 
-    @ManyToOne
-    @JoinColumn(name = "player_email")
-    val player: Player = Player()
+    @ManyToOne @JoinColumn(name = "player_email") val player: Player = Player()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

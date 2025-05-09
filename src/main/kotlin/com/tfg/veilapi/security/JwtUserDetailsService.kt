@@ -16,12 +16,10 @@ class JwtUserDetailsService(private val playerRepository: PlayerRepository) : Us
         val player = playerRepository.findById(username)
             .orElseThrow { UsernameNotFoundException("User not found with email: $username") }
 
-        // Convert roles into authorities
         val authorities = player.roles.stream()
             .map { role -> SimpleGrantedAuthority("ROLE_${role.name}") }
             .collect(Collectors.toList())
 
-        // If it doesn't have roles, add the default USER role
         if (authorities.isEmpty()) {
             authorities.add(SimpleGrantedAuthority("ROLE_USER"))
         }

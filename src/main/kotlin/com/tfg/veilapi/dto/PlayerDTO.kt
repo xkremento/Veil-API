@@ -22,21 +22,20 @@ data class PlayerRegistrationDTO(
         message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character"
     ) val password: String,
 
-    @field:URL(message = "Skin URL must be a valid URL") val skinUrl: String? = null
+    @field:URL(message = "Skin URL must be a valid URL") val skinUrl: String? = null,
+
+    @field:URL(message = "Profile image URL must be a valid URL") val profileImageUrl: String? = null
 )
 
 data class PlayerResponseDTO(
-    val email: String, val nickname: String, val coins: Int, val skinUrl: String?
+    val email: String, val nickname: String, val coins: Int, val skinUrl: String?, val profileImageUrl: String?
 )
 
 data class PlayerUpdateDTO(
     @field:Size(
-        min = 3,
-        max = 30,
-        message = "Nickname must be between 3 and 30 characters"
+        min = 3, max = 30, message = "Nickname must be between 3 and 30 characters"
     ) @field:Pattern(
-        regexp = "^[a-zA-Z0-9_]+$",
-        message = "Nickname can only contain letters, numbers and underscores"
+        regexp = "^[a-zA-Z0-9_]+$", message = "Nickname can only contain letters, numbers and underscores"
     ) val nickname: String? = null,
 
     @field:Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters") @field:Pattern(

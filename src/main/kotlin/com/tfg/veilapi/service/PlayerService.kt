@@ -18,7 +18,7 @@ class PlayerService(
     private val roleService: RoleService
 ) {
     companion object {
-        const val MAX_COINS = 999999 // Maximum limit of 6 digits
+        const val MAX_COINS = 999999
     }
 
     @Transactional
@@ -31,7 +31,8 @@ class PlayerService(
             email = playerDto.email,
             nickname = playerDto.nickname,
             password = passwordEncoder.encode(playerDto.password),
-            skinUrl = playerDto.skinUrl
+            skinUrl = playerDto.skinUrl,
+            profileImageUrl = playerDto.profileImageUrl
         )
 
         // Add USER role by default
@@ -41,7 +42,6 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Method to add admin role to a player
     @Transactional
     fun addAdminRole(email: String): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
@@ -50,7 +50,6 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Method to remove admin role from a player
     @Transactional
     fun removeAdminRole(email: String): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
@@ -59,7 +58,6 @@ class PlayerService(
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Method for admins to add coins to any player
     @Transactional
     fun adminAddCoinsToPlayer(playerEmail: String, amount: Int): PlayerResponseDTO {
         val player = findPlayerByEmail(playerEmail)
@@ -93,8 +91,7 @@ class PlayerService(
 
         val updatedPlayer = player.copy(
             nickname = updateDto.nickname ?: player.nickname,
-            password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password
-        )
+            password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password)
 
         val savedPlayer = playerRepository.save(updatedPlayer)
         return convertToResponseDTO(savedPlayer)
@@ -106,6 +103,18 @@ class PlayerService(
 
         val updatedPlayer = player.copy(
             nickname = nickname
+        )
+
+        val savedPlayer = playerRepository.save(updatedPlayer)
+        return convertToResponseDTO(savedPlayer)
+    }
+
+    @Transactional
+    fun adminUpdatePlayerProfileImage(email: String, profileImageUrl: String): PlayerResponseDTO {
+        val player = findPlayerByEmail(email)
+
+        val updatedPlayer = player.copy(
+            profileImageUrl = profileImageUrl
         )
 
         val savedPlayer = playerRepository.save(updatedPlayer)
@@ -149,7 +158,11 @@ class PlayerService(
 
     fun convertToResponseDTO(player: Player): PlayerResponseDTO {
         return PlayerResponseDTO(
-            email = player.email, nickname = player.nickname, coins = player.coins, skinUrl = player.skinUrl
+            email = player.email,
+            nickname = player.nickname,
+            coins = player.coins,
+            skinUrl = player.skinUrl,
+            profileImageUrl = player.profileImageUrl
         )
     }
 
@@ -171,6 +184,18 @@ class PlayerService(
 
         val updatedPlayer = player.copy(
             password = passwordEncoder.encode(newPassword)
+        )
+
+        val savedPlayer = playerRepository.save(updatedPlayer)
+        return convertToResponseDTO(savedPlayer)
+    }
+
+    @Transactional
+    fun updateProfileImage(email: String, profileImageUrl: String): PlayerResponseDTO {
+        val player = findPlayerByEmail(email)
+
+        val updatedPlayer = player.copy(
+            profileImageUrl = profileImageUrl
         )
 
         val savedPlayer = playerRepository.save(updatedPlayer)

@@ -61,13 +61,11 @@ class DataInitializer(
     }
 
     /**
-     * Load sample data for development and testing purposes
      * Creates players, friendships, friend requests, and games
      */
     private fun loadSampleData() {
-        // The safer way to clear all data is with native queries that bypass Hibernate's caching and collections
         try {
-            // Clear existing data using native queries to avoid cascading issues
+            // Clear existing data
             entityManager.createNativeQuery("DELETE FROM player_game").executeUpdate()
             entityManager.createNativeQuery("DELETE FROM friend_request").executeUpdate()
             entityManager.createNativeQuery("DELETE FROM friends").executeUpdate()
@@ -84,43 +82,48 @@ class DataInitializer(
 
             // Create sample players
             val player1 = Player(
-                email = "john@example.com",
-                nickname = "JohnDoe",
+                email = "paco@veil.com",
+                nickname = "DonCacaolate",
                 password = passwordEncoder.encode("password123"),
                 coins = 100,
-                skinUrl = "https://example.com/skins/default.png"
+                skinUrl = "https://example.com/skins/default.png",
+                profileImageUrl = "https://example.com/profiles/paco.png"
             )
 
             val player2 = Player(
-                email = "sarah@example.com",
-                nickname = "SarahGamer",
+                email = "manolo@veil.com",
+                nickname = "SalsichaGalactica",
                 password = passwordEncoder.encode("password456"),
                 coins = 150,
-                skinUrl = "https://example.com/skins/blue.png"
+                skinUrl = "https://example.com/skins/blue.png",
+                profileImageUrl = "https://example.com/profiles/manolo.png"
             )
 
             val player3 = Player(
-                email = "mike@example.com",
-                nickname = "MikeTheMurderer",
+                email = "pepe@veil.com",
+                nickname = "MatarileRilero",
                 password = passwordEncoder.encode("password789"),
                 coins = 200,
-                skinUrl = "https://example.com/skins/red.png"
+                skinUrl = "https://example.com/skins/red.png",
+                profileImageUrl = "https://example.com/profiles/pepe.png"
             )
 
             val player4 = Player(
-                email = "alex@example.com",
-                nickname = "AlexTheVictim",
+                email = "antonio@veil.com",
+                nickname = "PanicoPajarito",
                 password = passwordEncoder.encode("password321"),
                 coins = 50,
-                skinUrl = "https://example.com/skins/green.png"
+                skinUrl = "https://example.com/skins/green.png",
+                profileImageUrl = "https://example.com/profiles/antonio.png"
             )
 
             val player5 = Player(
-                email = "emma@example.com",
-                nickname = "EmmaPlays",
+                email = "juanito@veil.com",
+                nickname = "ChicleExplotaglobos",
                 password = passwordEncoder.encode("password654"),
                 coins = 75,
-                skinUrl = "https://example.com/skins/purple.png"
+                skinUrl = "https://example.com/skins/purple.png",
+                profileImageUrl = "https://example.com/profiles/juanito.png"
             )
 
             // Add USER role to all players
@@ -141,7 +144,7 @@ class DataInitializer(
             entityManager.flush()
 
             // Create friendships (bidirectional)
-            // John and Sarah are friends
+            // Paco and Manolo are friends
             val friendship1 = Friends(
                 player = savedPlayer1, friend = savedPlayer2, friendshipDateTime = LocalDateTime.now().minusDays(30)
             )
@@ -149,7 +152,7 @@ class DataInitializer(
                 player = savedPlayer2, friend = savedPlayer1, friendshipDateTime = LocalDateTime.now().minusDays(30)
             )
 
-            // John and Mike are friends
+            // Paco and Pepe are friends
             val friendship3 = Friends(
                 player = savedPlayer1, friend = savedPlayer3, friendshipDateTime = LocalDateTime.now().minusDays(15)
             )
@@ -157,7 +160,7 @@ class DataInitializer(
                 player = savedPlayer3, friend = savedPlayer1, friendshipDateTime = LocalDateTime.now().minusDays(15)
             )
 
-            // Sarah and Mike are friends
+            // Manolo and Pepe are friends
             val friendship5 = Friends(
                 player = savedPlayer2, friend = savedPlayer3, friendshipDateTime = LocalDateTime.now().minusDays(7)
             )
@@ -176,17 +179,17 @@ class DataInitializer(
             entityManager.flush()
 
             // Create pending friend requests
-            // Alex sent a request to John
+            // Antonio sent a request to Paco
             val friendRequest1 = FriendRequest(
                 requester = savedPlayer4, player = savedPlayer1
             )
 
-            // Emma sent a request to John
+            // Juanito sent a request to Paco
             val friendRequest2 = FriendRequest(
                 requester = savedPlayer5, player = savedPlayer1
             )
 
-            // Emma sent a request to Sarah
+            // Juanito sent a request to Manolo
             val friendRequest3 = FriendRequest(
                 requester = savedPlayer5, player = savedPlayer2
             )
@@ -218,7 +221,7 @@ class DataInitializer(
             entityManager.flush()
 
             // Create player-game relationships
-            // Game 1 with John, Sarah, and Mike (Mike is the murderer)
+            // Game 1 with Paco, Manolo, and Pepe (Pepe is the murderer)
             val playerGame1 = PlayerGame(
                 player = savedPlayer1,
                 game = savedGame1,
@@ -240,7 +243,7 @@ class DataInitializer(
                 gameDateTime = LocalDateTime.now().minusDays(5)
             )
 
-            // Game 2 with all players (Alex is the murderer)
+            // Game 2 with all players (Antonio is the murderer)
             val playerGame4 = PlayerGame(
                 player = savedPlayer1,
                 game = savedGame2,

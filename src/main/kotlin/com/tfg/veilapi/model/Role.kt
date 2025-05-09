@@ -5,12 +5,9 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "roles")
 data class Role(
-    @Id
-    @Column(length = 20)
-    val name: String = "",
+    @Id @Column(length = 20) val name: String = "",
 
-    @ManyToMany(mappedBy = "roles")
-    val players: MutableSet<Player> = mutableSetOf()
+    @ManyToMany(mappedBy = "roles") val players: MutableSet<Player> = mutableSetOf()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

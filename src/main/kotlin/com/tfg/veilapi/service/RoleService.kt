@@ -12,7 +12,6 @@ class RoleService(private val roleRepository: RoleRepository) {
     @PostConstruct
     @Transactional
     fun initialize() {
-        // Crear roles iniciales si no existen
         if (!roleRepository.existsById("USER")) {
             roleRepository.save(Role(name = "USER"))
         }
