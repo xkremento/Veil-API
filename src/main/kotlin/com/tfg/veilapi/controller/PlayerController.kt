@@ -1,5 +1,6 @@
 package com.tfg.veilapi.controller
 
+import com.tfg.veilapi.dto.PasswordUpdateDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
 import com.tfg.veilapi.dto.PlayerUpdateDTO
 import com.tfg.veilapi.service.AuthorizationService
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -38,22 +40,20 @@ class PlayerController(
         return playerService.getPlayer(currentUserEmail)
     }
 
-
-
-    @Operation(summary = "Update current player", description = "Updates authenticated player information")
+    @Operation(summary = "Change password", description = "Changes the authenticated player's password")
     @ApiResponses(
         value = [ApiResponse(
             responseCode = "200",
-            description = "Player updated successfully",
+            description = "Password changed successfully",
             content = [Content(schema = Schema(implementation = PlayerResponseDTO::class))]
         ), ApiResponse(
             responseCode = "404", description = "Player not found", content = [Content()]
         )]
     )
-    @PutMapping
-    fun updateCurrentPlayer(@RequestBody updateDto: PlayerUpdateDTO): PlayerResponseDTO {
+    @PutMapping("/password")
+    fun changePassword(@Valid @RequestBody passwordUpdateDTO: PasswordUpdateDTO): PlayerResponseDTO {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        return playerService.updatePlayer(currentUserEmail, updateDto)
+        return playerService.changePassword(currentUserEmail, passwordUpdateDTO.password)
     }
 
     @Operation(summary = "Delete current player", description = "Deletes authenticated player account")

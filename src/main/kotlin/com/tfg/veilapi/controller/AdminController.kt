@@ -12,9 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/admin")
@@ -99,6 +102,34 @@ class AdminController(private val playerService: PlayerService) {
         @Valid @RequestBody updateSkinDTO: UpdateSkinDTO
     ): PlayerResponseDTO {
         return playerService.adminUpdatePlayerSkin(email, updateSkinDTO.skinUrl)
+    }
+
+    @Operation(summary = "Update player nickname", description = "Updates a player's nickname (admin only)")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Nickname updated successfully",
+            content = [Content(schema = Schema(implementation = PlayerResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Player not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
+        )]
+    )
+    @PutMapping("/players/{email}/nickname")
+    fun updatePlayerNickname(
+        @PathVariable email: String,
+        @RequestBody @Valid nicknameDto: Map<String, @Valid @Pattern(
+            regexp = "^[a-zA-Z0-9_]+$",
+            message = "Nickname can only contain letters, numbers and underscores"
+        ) @Size(
+            min = 3, max = 30, message = "Nickname must be between 3 and 30 characters"
+        ) String>
+    ): PlayerResponseDTO {
+        val nickname = nicknameDto["nickname"] ?: throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Nickname is required"
+        )
+        return playerService.adminUpdateNickname(email, nickname)
     }
 
     @Operation(summary = "Remove admin role", description = "Removes admin role from a player (admin only)")

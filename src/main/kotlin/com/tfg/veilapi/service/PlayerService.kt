@@ -88,20 +88,30 @@ class PlayerService(
     }
 
     @Transactional
-    fun updatePlayer(email: String, updateDto: PlayerUpdateDTO): PlayerResponseDTO {
+    fun adminUpdatePlayer(email: String, updateDto: PlayerUpdateDTO): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
 
         val updatedPlayer = player.copy(
             nickname = updateDto.nickname ?: player.nickname,
-            password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password,
-            skinUrl = updateDto.skinUrl ?: player.skinUrl)
+            password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password
+        )
 
         val savedPlayer = playerRepository.save(updatedPlayer)
         return convertToResponseDTO(savedPlayer)
     }
 
-    // Original method to add coins - kept for potential internal use
-    // but not exposed through public endpoints
+    @Transactional
+    fun adminUpdateNickname(email: String, nickname: String): PlayerResponseDTO {
+        val player = findPlayerByEmail(email)
+
+        val updatedPlayer = player.copy(
+            nickname = nickname
+        )
+
+        val savedPlayer = playerRepository.save(updatedPlayer)
+        return convertToResponseDTO(savedPlayer)
+    }
+
     @Transactional
     protected fun addCoinsToPlayer(email: String, amount: Int): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
@@ -149,6 +159,18 @@ class PlayerService(
 
         val updatedPlayer = player.copy(
             skinUrl = skinUrl
+        )
+
+        val savedPlayer = playerRepository.save(updatedPlayer)
+        return convertToResponseDTO(savedPlayer)
+    }
+
+    @Transactional
+    fun changePassword(email: String, newPassword: String): PlayerResponseDTO {
+        val player = findPlayerByEmail(email)
+
+        val updatedPlayer = player.copy(
+            password = passwordEncoder.encode(newPassword)
         )
 
         val savedPlayer = playerRepository.save(updatedPlayer)

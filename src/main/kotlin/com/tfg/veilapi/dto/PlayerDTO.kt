@@ -42,7 +42,5 @@ data class PlayerUpdateDTO(
     @field:Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters") @field:Pattern(
         regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$",
         message = "Password must contain at least one digit, one lowercase, one uppercase, and one special character"
-    ) val password: String? = null,
-
-    @field:URL(message = "Skin URL must be a valid URL") val skinUrl: String? = null
+    ) val password: String? = null
 )
