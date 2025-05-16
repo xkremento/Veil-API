@@ -72,4 +72,69 @@ class GameService(
             getGame(pg.game.id)
         }.distinct()
     }
+
+    /**
+     * Checks if a player was the murderer in a specific game
+     *
+     * @param playerEmail The email of the player to check
+     * @param gameId The ID of the game to check
+     * @return True if the player was the murderer, false otherwise
+     */
+    fun wasPlayerMurdererInGame(playerEmail: String, gameId: Long): Boolean {
+        val player = playerService.findPlayerByEmail(playerEmail)
+
+        val playerGame =
+            playerGameRepository.findByPlayerEmailAndGameId(player.email, gameId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Player was not part of this game"
+            )
+
+        return playerGame.role == GameRole.MURDERER
+    }
+
+    /**
+     * Sets a player as murderer in a game (admin only)
+     * Updates the roles accordingly - sets the current murderer to innocent and the new player to murderer
+     *
+     * @param gameId The ID of the game
+     * @param playerEmail The email of the player to set as murderer
+     * @return Updated game response DTO
+     */
+    @Transactional
+    fun setPlayerAsMurderer(gameId: Long, playerEmail: String): GameResponseDTO {
+        // Find the game
+        val game = gameRepository.findById(gameId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Game not found") }
+
+        // Find the player
+        playerService.findPlayerByEmail(playerEmail)
+
+        // Find the player's role in the game
+        val playerGames = playerGameRepository.findByGameId(game.id)
+
+        // Check if player is part of the game
+        val playerGame = playerGames.find { it.player.email == playerEmail } ?: throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Player is not part of this game"
+        )
+
+        // Find current murderer
+        val currentMurderer = playerGames.find { it.role == GameRole.MURDERER }
+
+        // Update roles
+        if (currentMurderer != null && currentMurderer.id != playerGame.id) {
+            val updatedCurrentMurderer = currentMurderer.copy(
+                role = GameRole.INNOCENT
+            )
+            playerGameRepository.save(updatedCurrentMurderer)
+        }
+
+        // Update new murderer
+        val updatedPlayerGame = playerGame.copy(
+            role = GameRole.MURDERER
+        )
+        playerGameRepository.save(updatedPlayerGame)
+
+        return getGame(game.id)
+    }
 }

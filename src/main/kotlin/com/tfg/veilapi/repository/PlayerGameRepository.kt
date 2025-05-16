@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 interface PlayerGameRepository : JpaRepository<PlayerGame, Long> {
     fun findByPlayerEmail(playerEmail: String): List<PlayerGame>
     fun findByGameId(gameId: Long): List<PlayerGame>
+    fun findByPlayerEmailAndGameId(playerEmail: String, gameId: Long): PlayerGame?
 }

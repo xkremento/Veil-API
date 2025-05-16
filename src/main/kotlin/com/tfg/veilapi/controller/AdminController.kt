@@ -1,9 +1,11 @@
 package com.tfg.veilapi.controller
 
 import com.tfg.veilapi.dto.AddCoinsDTO
+import com.tfg.veilapi.dto.GameResponseDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
 import com.tfg.veilapi.dto.ProfileImageDTO
 import com.tfg.veilapi.dto.UpdateSkinDTO
+import com.tfg.veilapi.service.GameService
 import com.tfg.veilapi.service.PlayerService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,7 +27,10 @@ import org.springframework.web.server.ResponseStatusException
 @Tag(name = "Admin", description = "Admin operations API")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")
-class AdminController(private val playerService: PlayerService) {
+class AdminController(
+    private val playerService: PlayerService,
+    private val gameService: GameService
+) {
 
     @Operation(
         summary = "Get player details by email", description = "Retrieves player information by email (admin only)"
@@ -163,5 +168,30 @@ class AdminController(private val playerService: PlayerService) {
     @DeleteMapping("/players/{email}/roles/admin")
     fun removeAdminRole(@PathVariable email: String): PlayerResponseDTO {
         return playerService.removeAdminRole(email)
+    }
+
+    @Operation(
+        summary = "Set player as murderer",
+        description = "Set a player as the murderer in a specific game (admin only)"
+    )
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Player set as murderer successfully",
+            content = [Content(schema = Schema(implementation = GameResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Game or player not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "400", description = "Player not in game", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
+        )]
+    )
+    @PutMapping("/games/{gameId}/set-murderer/{playerEmail}")
+    fun setPlayerAsMurderer(
+        @PathVariable gameId: Long,
+        @PathVariable playerEmail: String
+    ): GameResponseDTO {
+        return gameService.setPlayerAsMurderer(gameId, playerEmail)
     }
 }

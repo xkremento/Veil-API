@@ -94,4 +94,36 @@ class GameController(
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         return gameService.getPlayerGames(currentUserEmail)
     }
+
+    @Operation(
+        summary = "Check if player was murderer",
+        description = "Check if the authenticated player was the murderer in a specific game"
+    )
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "200",
+            description = "Role check completed",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        ), ApiResponse(
+            responseCode = "404", description = "Game not found or player not in game", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Can only check your own status", content = [Content()]
+        )]
+    )
+    @GetMapping("/{gameId}/was-murderer")
+    fun checkIfPlayerWasMurderer(@PathVariable gameId: Long): Map<String, Boolean> {
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+
+        val game = gameService.getGame(gameId)
+        val playerEmails = game.players.map { it.playerEmail }
+
+        if (!playerEmails.contains(currentUserEmail)) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN, "You cannot check role in a game you did not participate in."
+            )
+        }
+
+        val wasMurderer = gameService.wasPlayerMurdererInGame(currentUserEmail, gameId)
+        return mapOf("wasMurderer" to wasMurderer)
+    }
 }
