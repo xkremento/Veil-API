@@ -1,7 +1,10 @@
 package com.tfg.veilapi.dto
 
 data class FriendRequestDTO(
-    val friendRequestId: Long, val requesterId: String, val playerId: String
+    val friendRequestId: Long,
+    val requesterId: String,
+    val requesterNickname: String,
+    val playerId: String
 )
 
 data class FriendResponseDTO(

@@ -27,7 +27,10 @@ class FriendService(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Friend request not found") }
 
         return FriendRequestDTO(
-            friendRequestId = request.id, requesterId = request.requester.email, playerId = request.player.email
+            friendRequestId = request.id,
+            requesterId = request.requester.email,
+            requesterNickname = request.requester.nickname,
+            playerId = request.player.email
         )
     }
 
@@ -96,7 +99,10 @@ class FriendService(
 
         return requests.map {
             FriendRequestDTO(
-                friendRequestId = it.id, requesterId = it.requester.email, playerId = it.player.email
+                friendRequestId = it.id,
+                requesterId = it.requester.email,
+                requesterNickname = it.requester.nickname,
+                playerId = it.player.email
             )
         }
     }
