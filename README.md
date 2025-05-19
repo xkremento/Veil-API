@@ -40,6 +40,8 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - Assign roles to players (murderer/innocent)
 - View game details with player information
 - Track game history
+- Check if the player was the murderer in a specific game
+- Admin ability to change the murderer in a game
 
 ### Admin Functionality
 - Manage player roles (promote/demote admins)
@@ -47,6 +49,7 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - Add coins to player accounts
 - View detailed player information
 - Update profile images for any player
+- Change the murderer role in an existing game
 
 ## API Endpoints
 
@@ -72,6 +75,7 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - `POST /api/games` - Create a new game
 - `GET /api/games/{gameId}` - Get game details
 - `GET /api/games` - Get all games for current player
+- `GET /api/games/{gameId}/was-murderer` - Check if the authenticated player was the murderer in a specific game
 
 ### Admin Endpoints
 - `GET /api/admin/players/{email}` - Get details for any player
@@ -81,6 +85,7 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - `PUT /api/admin/players/{email}/skin` - Update a player's skin URL
 - `PUT /api/admin/players/{email}/nickname` - Update a player's nickname
 - `PUT /api/admin/players/{email}/profile-image` - Update a player's profile image
+- `PUT /api/admin/games/{gameId}/set-murderer/{playerEmail}` - Set a specific player as the murderer in a game
 
 ## Documentation
 
