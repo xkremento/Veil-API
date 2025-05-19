@@ -30,7 +30,8 @@ class FriendService(
             friendRequestId = request.id,
             requesterId = request.requester.email,
             requesterNickname = request.requester.nickname,
-            playerId = request.player.email
+            playerId = request.player.email,
+            requesterProfileImageUrl = request.requester.profileImageUrl
         )
     }
 
@@ -81,7 +82,9 @@ class FriendService(
         return FriendResponseDTO(
             email = request.requester.email,
             nickname = request.requester.nickname,
-            friendshipDate = now.format(DateTimeFormatter.ISO_DATE_TIME)
+            friendshipDate = now.format(DateTimeFormatter.ISO_DATE_TIME),
+            profileImageUrl = request.requester.profileImageUrl,
+            skinUrl = request.requester.skinUrl
         )
     }
 
@@ -102,7 +105,8 @@ class FriendService(
                 friendRequestId = it.id,
                 requesterId = it.requester.email,
                 requesterNickname = it.requester.nickname,
-                playerId = it.player.email
+                playerId = it.player.email,
+                requesterProfileImageUrl = it.requester.profileImageUrl
             )
         }
     }
@@ -117,13 +121,17 @@ class FriendService(
                 throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
             }
 
-            val friendship = friendships.firstOrNull()
-                ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Friendship not found")
+            val friendship = friendships.firstOrNull() ?: throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Friendship not found"
+            )
 
             FriendResponseDTO(
                 email = friend.email,
                 nickname = friend.nickname,
-                friendshipDate = friendship.friendshipDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
+                friendshipDate = friendship.friendshipDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
+                profileImageUrl = friend.profileImageUrl,
+                skinUrl = friend.skinUrl
             )
         }
     }
