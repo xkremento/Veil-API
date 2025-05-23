@@ -8,11 +8,12 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 
 ## Technologies Used
 
-- **Backend**: Kotlin with Spring Boot
-- **Security**: JWT Authentication & Authorization
-- **Database**: MySQL
-- **Documentation**: Swagger/OpenAPI
-- **Dependencies Management**: Gradle
+- **Backend**: Kotlin with Spring Boot 3.4.4
+- **Security**: JWT Authentication & Spring Security
+- **Database**: MySQL (AWS RDS)
+- **Documentation**: Swagger/OpenAPI 3.0
+- **Build Tool**: Gradle with Kotlin DSL
+- **Java Version**: 17
 - **Validation**: Jakarta Bean Validation
 
 ## Features
@@ -20,7 +21,8 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 ### Authentication
 - User registration with email validation
 - Login with JWT token generation
-- Role-based authorization (User/Admin)
+- Role-based authorization (USER/ADMIN)
+- Token expiration handling
 
 ### Player Management
 - Player profiles with customizable profile images
@@ -32,8 +34,9 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 ### Social Features
 - Send and receive friend requests
 - Accept or decline friendship requests
-- View list of friends and pending requests
-- Remove friends
+- View list of friends with friendship dates
+- View pending friend requests
+- Remove friends (bidirectional removal)
 
 ### Game Management
 - Create new game sessions
@@ -45,11 +48,11 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 
 ### Admin Functionality
 - Manage player roles (promote/demote admins)
-- Update player nicknames and skins
+- Update any player's nickname, skin, or profile image
 - Add coins to player accounts
-- View detailed player information
-- Update profile images for any player
-- Change the murderer role in an existing game
+- View detailed information for any player
+- Create and manage game sessions
+- Change murderer assignments in existing games
 
 ## API Endpoints
 
@@ -72,10 +75,9 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - `DELETE /api/friends/{friendEmail}` - Remove a friend
 
 ### Game Endpoints
-- `POST /api/games` - Create a new game
-- `GET /api/games/{gameId}` - Get game details
+- `GET /api/games/{gameId}` - Get game details (players can only view games they participated in)
 - `GET /api/games` - Get all games for current player
-- `GET /api/games/{gameId}/was-murderer` - Check if the authenticated player was the murderer in a specific game
+- `GET /api/games/{gameId}/was-murderer` - Check if the authenticated player was the murderer
 
 ### Admin Endpoints
 - `GET /api/admin/players/{email}` - Get details for any player
@@ -85,7 +87,8 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 - `PUT /api/admin/players/{email}/skin` - Update a player's skin URL
 - `PUT /api/admin/players/{email}/nickname` - Update a player's nickname
 - `PUT /api/admin/players/{email}/profile-image` - Update a player's profile image
-- `PUT /api/admin/games/{gameId}/set-murderer/{playerEmail}` - Set a specific player as the murderer in a game
+- `POST /api/admin/games` - Create a new game session
+- `PUT /api/admin/games/{gameId}/set-murderer/{playerEmail}` - Change the murderer in a game
 
 ## Documentation
 
@@ -98,17 +101,54 @@ This provides a comprehensive view of all available endpoints, their parameters,
 
 ## Security
 
-Security is a top priority for this API:
+Security features implemented:
 
-- JWT tokens for authentication with configurable expiration time
-- Role-based access control for endpoints
-- Password encryption using BCrypt
-- Restricted player data modification (users can only change their password and profile image)
-- Admin-only operations for sensitive data updates
-- Input validation on all endpoints
-- Protection against SQL injection and XSS attacks
-- CORS configuration for secure cross-origin requests
+- **JWT Authentication**: Stateless authentication with configurable expiration
+- **Role-based Access Control**: USER and ADMIN roles with specific permissions
+- **Password Encryption**: BCrypt with salt for secure password storage
+- **Authorization Service**: Validates user access to resources
+- **Input Validation**: All inputs validated using Jakarta Bean Validation
+- **SQL Injection Protection**: Using JPA parameterized queries
+- **Restricted Operations**: Users can only modify their own data (except admins)
+
+## Database Schema
+
+The application uses MySQL with the following main entities:
+- **Player**: User accounts with authentication and profile information
+- **Role**: User roles (USER, ADMIN)
+- **Game**: Game sessions with duration
+- **PlayerGame**: Many-to-many relationship between players and games with role assignment
+- **Friends**: Bidirectional friendship relationships
+- **FriendRequest**: Pending friendship requests
+
+## Configuration
+
+Key configuration properties in `application.properties`:
+- Server port: 8080
+- JWT expiration: 24 hours (configurable)
+- Database: MySQL on AWS RDS
+- Hibernate DDL: auto-update
+- Admin account created on startup (configurable)
+- Sample data loading (configurable)
 
 ## Error Handling
 
-The API provides consistent error responses across all endpoints, with appropriate HTTP status codes and descriptive error messages to facilitate debugging and improve the user experience.
+The API provides consistent error responses:
+- **400 Bad Request**: Invalid input or business rule violation
+- **401 Unauthorized**: Missing or invalid authentication
+- **403 Forbidden**: Insufficient permissions
+- **404 Not Found**: Resource not found
+- **409 Conflict**: Duplicate resources or conflicting state
+
+All errors include descriptive messages to help with debugging.
+he API provides consistent error responses across all endpoints, with appropriate HTTP status codes and descriptive error messages to facilitate debugging and improve the user experience.
+
+## Sample Data
+
+When `app.data.load-sample=true`, the application loads sample data including:
+- Admin user account
+- Sample players with Spanish names
+- Friend relationships
+- Sample games with assigned roles
+
+This is useful for development and testing purposes.
