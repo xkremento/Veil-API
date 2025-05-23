@@ -1,99 +1,118 @@
 package com.tfg.veilapi.controller
 
+import com.tfg.veilapi.dto.GameCreationDTO
 import com.tfg.veilapi.dto.GameResponseDTO
 import com.tfg.veilapi.service.AuthorizationService
 import com.tfg.veilapi.service.GameService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.ArraySchema
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-@RequestMapping("/api/games")
-@Tag(name = "Games", description = "Game management API")
-@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/games")
+@Tag(name = "Game Management", description = "Operations for managing games")
 class GameController(
-    private val gameService: GameService, private val authorizationService: AuthorizationService
+    private val gameService: GameService,
+    private val authorizationService: AuthorizationService
 ) {
 
-    @Operation(summary = "Get game", description = "Get details of a specific game")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Game details retrieved successfully",
-            content = [Content(schema = Schema(implementation = GameResponseDTO::class))]
-        ), ApiResponse(
-            responseCode = "404", description = "Game not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - User must be a participant in the game",
-            content = [Content()]
-        )]
-    )
-    @GetMapping("/{gameId}")
-    fun getGame(@PathVariable gameId: Long): GameResponseDTO {
-        val game = gameService.getGame(gameId)
-
+    @PostMapping
+    @Operation(summary = "Create a new game")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "201", description = "Game created successfully"),
+        ApiResponse(responseCode = "400", description = "Invalid game data or murderer not in player list"),
+        ApiResponse(responseCode = "403", description = "Not authorized to create game with these players")
+    ])
+    fun createGame(@Valid @RequestBody gameDto: GameCreationDTO): ResponseEntity<GameResponseDTO> {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        val playerEmails = game.players.map { it.playerEmail }
-        if (!playerEmails.contains(currentUserEmail)) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN, "You do not have access to this game."
-            )
+
+        // Verify that the authenticated user is in the list of players
+        if (!gameDto.playerEmails.contains(currentUserEmail)) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only create games where you are a participant")
         }
-        return game
+
+        // Validate that there are no duplicate emails
+        if (gameDto.playerEmails.size != gameDto.playerEmails.toSet().size) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate player emails are not allowed")
+        }
+
+        val game = gameService.createGame(gameDto)
+        return ResponseEntity(game, HttpStatus.CREATED)
     }
 
-    @Operation(summary = "Get my games", description = "Get all games for the authenticated player")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Player games retrieved successfully",
-            content = [Content(array = ArraySchema(schema = Schema(implementation = GameResponseDTO::class)))]
-        )]
-    )
-    @GetMapping
-    fun getMyGames(): List<GameResponseDTO> {
+    @GetMapping("/{gameId}")
+    @Operation(summary = "Get game details")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Game details retrieved successfully"),
+        ApiResponse(responseCode = "403", description = "Not authorized to view this game"),
+        ApiResponse(responseCode = "404", description = "Game not found")
+    ])
+    fun getGame(@PathVariable gameId: Long): ResponseEntity<GameResponseDTO> {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        return gameService.getPlayerGames(currentUserEmail)
-    }
-
-    @Operation(
-        summary = "Check if player was murderer",
-        description = "Check if the authenticated player was the murderer in a specific game"
-    )
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Role check completed",
-            content = [Content(schema = Schema(implementation = Map::class))]
-        ), ApiResponse(
-            responseCode = "404", description = "Game not found or player not in game", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403", description = "Forbidden - Can only check your own status", content = [Content()]
-        )]
-    )
-    @GetMapping("/{gameId}/was-murderer")
-    fun checkIfPlayerWasMurderer(@PathVariable gameId: Long): Map<String, Boolean> {
-        val currentUserEmail = authorizationService.getCurrentUserEmail()
-
         val game = gameService.getGame(gameId)
-        val playerEmails = game.players.map { it.playerEmail }
 
-        if (!playerEmails.contains(currentUserEmail)) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN, "You cannot check role in a game you did not participate in."
-            )
+        // Verify that the authenticated user is part of the game
+        val isPlayerInGame = game.players.any { it.playerEmail == currentUserEmail }
+        if (!isPlayerInGame) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only view games you participated in")
+        }
+
+        return ResponseEntity.ok(game)
+    }
+
+    @GetMapping("/my-games")
+    @Operation(summary = "Get games for authenticated user")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "User's games retrieved successfully")
+    ])
+    fun getMyGames(): ResponseEntity<List<GameResponseDTO>> {
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+        val games = gameService.getPlayerGames(currentUserEmail)
+        return ResponseEntity.ok(games)
+    }
+
+    @GetMapping("/{gameId}/murderer-check")
+    @Operation(summary = "Check if authenticated user was murderer in specific game")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Murderer status retrieved successfully"),
+        ApiResponse(responseCode = "403", description = "Not authorized to check this game"),
+        ApiResponse(responseCode = "404", description = "Game not found or user not in game")
+    ])
+    fun checkIfMurderer(@PathVariable gameId: Long): ResponseEntity<Map<String, Boolean>> {
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
+
+        // Verify that the user is in the game before revealing information
+        val game = gameService.getGame(gameId)
+        val isPlayerInGame = game.players.any { it.playerEmail == currentUserEmail }
+        if (!isPlayerInGame) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only check games you participated in")
         }
 
         val wasMurderer = gameService.wasPlayerMurdererInGame(currentUserEmail, gameId)
-        return mapOf("wasMurderer" to wasMurderer)
+        return ResponseEntity.ok(mapOf("wasMurderer" to wasMurderer))
+    }
+
+    @PutMapping("/{gameId}/murderer/{playerEmail}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Set player as murderer (Admin only)")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Murderer updated successfully"),
+        ApiResponse(responseCode = "400", description = "Player not in game"),
+        ApiResponse(responseCode = "403", description = "Admin access required"),
+        ApiResponse(responseCode = "404", description = "Game not found")
+    ])
+    fun setPlayerAsMurderer(
+        @PathVariable gameId: Long,
+        @PathVariable playerEmail: String
+    ): ResponseEntity<GameResponseDTO> {
+        val updatedGame = gameService.setPlayerAsMurderer(gameId, playerEmail)
+        return ResponseEntity.ok(updatedGame)
     }
 }

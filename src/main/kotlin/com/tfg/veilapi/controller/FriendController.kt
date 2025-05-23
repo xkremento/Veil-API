@@ -6,138 +6,115 @@ import com.tfg.veilapi.dto.FriendResponseDTO
 import com.tfg.veilapi.service.AuthorizationService
 import com.tfg.veilapi.service.FriendService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.ArraySchema
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
-@RequestMapping("/api/friends")
-@Tag(name = "Friends", description = "Friend relationship management API")
-@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/friends")
+@Tag(name = "Friend Management", description = "Operations for managing friend relationships")
 class FriendController(
-    private val friendService: FriendService, private val authorizationService: AuthorizationService
+    private val friendService: FriendService,
+    private val authorizationService: AuthorizationService
 ) {
 
-    @Operation(summary = "Send friend request", description = "Send a friend request to another player")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "201",
-            description = "Friend request sent successfully",
-            content = [Content(schema = Schema(implementation = Map::class))]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "409", description = "Already friends or request already sent", content = [Content()]
-        )]
-    )
     @PostMapping("/requests")
-    @ResponseStatus(HttpStatus.CREATED)
-    fun sendFriendRequest(@RequestBody requestDto: CreateFriendRequestDTO): Map<String, Long> {
-        val currentUserEmail = authorizationService.getCurrentUserEmail()
+    @Operation(summary = "Send a friend request")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "201", description = "Friend request sent successfully"),
+        ApiResponse(responseCode = "400", description = "Invalid request data or cannot send request to yourself"),
+        ApiResponse(responseCode = "409", description = "Friend request already sent or already friends")
+    ])
+    fun sendFriendRequest(@Valid @RequestBody requestDto: CreateFriendRequestDTO): ResponseEntity<Map<String, Any>> {
+        //Verify that you don't send a request to yourself
+        if (requestDto.requesterId == requestDto.playerId) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot send friend request to yourself")
+        }
 
-        val updatedRequestDto = CreateFriendRequestDTO(
-            requesterId = currentUserEmail, playerId = requestDto.playerId
+        //Verify that the authenticated user is the sender
+        authorizationService.validateUserAccess(requestDto.requesterId)
+
+        val requestId = friendService.sendFriendRequest(requestDto)
+        val response = mapOf(
+            "message" to "Friend request sent successfully",
+            "friendRequestId" to requestId
         )
-        val requestId = friendService.sendFriendRequest(updatedRequestDto)
-        return mapOf("requestId" to requestId)
+        return ResponseEntity(response, HttpStatus.CREATED)
     }
 
-    @Operation(summary = "Accept friend request", description = "Accept a pending friend request")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "Friend request accepted",
-            content = [Content(schema = Schema(implementation = FriendResponseDTO::class))]
-        ), ApiResponse(
-            responseCode = "404", description = "Friend request not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Cannot accept requests for other users",
-            content = [Content()]
-        )]
-    )
     @PostMapping("/requests/{requestId}/accept")
-    fun acceptFriendRequest(@PathVariable requestId: Long): FriendResponseDTO {
+    @Operation(summary = "Accept a friend request")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Friend request accepted successfully"),
+        ApiResponse(responseCode = "403", description = "Not authorized to accept this request"),
+        ApiResponse(responseCode = "404", description = "Friend request not found")
+    ])
+    fun acceptFriendRequest(@PathVariable requestId: Long): ResponseEntity<FriendResponseDTO> {
+        //Verify that the authenticated user is the recipient of the request
+        val friendRequest = friendService.getFriendRequestById(requestId)
+        authorizationService.validateUserAccess(friendRequest.playerId)
 
-        val request = friendService.getFriendRequestById(requestId)
-
-        authorizationService.validateUserAccess(request.playerId)
-        return friendService.acceptFriendRequest(requestId)
+        val newFriend = friendService.acceptFriendRequest(requestId)
+        return ResponseEntity.ok(newFriend)
     }
 
-    @Operation(summary = "Decline friend request", description = "Decline a pending friend request")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "204", description = "Friend request declined successfully", content = [Content()]
-        ), ApiResponse(
-            responseCode = "404", description = "Friend request not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Cannot decline requests for other users",
-            content = [Content()]
-        )]
-    )
-    @PostMapping("/requests/{requestId}/decline")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun declineFriendRequest(@PathVariable requestId: Long) {
+    @DeleteMapping("/requests/{requestId}")
+    @Operation(summary = "Reject or cancel a friend request")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "Friend request rejected/cancelled successfully"),
+        ApiResponse(responseCode = "403", description = "Not authorized to modify this request"),
+        ApiResponse(responseCode = "404", description = "Friend request not found")
+    ])
+    fun rejectFriendRequest(@PathVariable requestId: Long): ResponseEntity<Void> {
+        //Verify that the authenticated user is the recipient or sender
+        val friendRequest = friendService.getFriendRequestById(requestId)
+        val currentUserEmail = authorizationService.getCurrentUserEmail()
 
-        val request = friendService.getFriendRequestById(requestId)
+        if (currentUserEmail != friendRequest.playerId && currentUserEmail != friendRequest.requesterId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to modify this friend request")
+        }
 
-        authorizationService.validateUserAccess(request.playerId)
         friendService.rejectFriendRequest(requestId)
+        return ResponseEntity.noContent().build()
     }
 
-    @Operation(
-        summary = "Get friend requests", description = "Get all pending friend requests for the authenticated user"
-    )
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "List of friend requests",
-            content = [Content(array = ArraySchema(schema = Schema(implementation = FriendRequestDTO::class)))]
-        )]
-    )
     @GetMapping("/requests")
-    fun getFriendRequests(): List<FriendRequestDTO> {
-
+    @Operation(summary = "Get incoming friend requests for authenticated user")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Friend requests retrieved successfully")
+    ])
+    fun getFriendRequests(): ResponseEntity<List<FriendRequestDTO>> {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        return friendService.getFriendRequests(currentUserEmail)
+        val requests = friendService.getFriendRequests(currentUserEmail)
+        return ResponseEntity.ok(requests)
     }
 
-    @Operation(summary = "Get friends", description = "Get all friends for the authenticated user")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "200",
-            description = "List of friends",
-            content = [Content(array = ArraySchema(schema = Schema(implementation = FriendResponseDTO::class)))]
-        )]
-    )
     @GetMapping
-    fun getFriends(): List<FriendResponseDTO> {
-
+    @Operation(summary = "Get friends list for authenticated user")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Friends list retrieved successfully")
+    ])
+    fun getFriends(): ResponseEntity<List<FriendResponseDTO>> {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
-        return friendService.getFriends(currentUserEmail)
+        val friends = friendService.getFriends(currentUserEmail)
+        return ResponseEntity.ok(friends)
     }
 
-    @Operation(summary = "Remove friend", description = "Remove a friend from the authenticated user's friend list")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "204", description = "Friend removed successfully", content = [Content()]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        )]
-    )
     @DeleteMapping("/{friendEmail}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun removeFriend(@PathVariable friendEmail: String) {
-
+    @Operation(summary = "Remove a friend")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "Friend removed successfully"),
+        ApiResponse(responseCode = "404", description = "Friend not found")
+    ])
+    fun removeFriend(@PathVariable friendEmail: String): ResponseEntity<Void> {
         val currentUserEmail = authorizationService.getCurrentUserEmail()
         friendService.removeFriend(currentUserEmail, friendEmail)
+        return ResponseEntity.noContent().build()
     }
 }
