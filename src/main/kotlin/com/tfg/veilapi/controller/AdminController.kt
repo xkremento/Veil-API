@@ -1,6 +1,7 @@
 package com.tfg.veilapi.controller
 
 import com.tfg.veilapi.dto.AddCoinsDTO
+import com.tfg.veilapi.dto.GameCreationDTO
 import com.tfg.veilapi.dto.GameResponseDTO
 import com.tfg.veilapi.dto.PlayerResponseDTO
 import com.tfg.veilapi.dto.ProfileImageDTO
@@ -168,6 +169,28 @@ class AdminController(
     @DeleteMapping("/players/{email}/roles/admin")
     fun removeAdminRole(@PathVariable email: String): PlayerResponseDTO {
         return playerService.removeAdminRole(email)
+    }
+
+    @Operation(summary = "Create game", description = "Create a new game with players (admin only)")
+    @ApiResponses(
+        value = [ApiResponse(
+            responseCode = "201",
+            description = "Game created successfully",
+            content = [Content(schema = Schema(implementation = GameResponseDTO::class))]
+        ), ApiResponse(
+            responseCode = "400",
+            description = "Invalid request - murderer must be one of the players",
+            content = [Content()]
+        ), ApiResponse(
+            responseCode = "404", description = "Player not found", content = [Content()]
+        ), ApiResponse(
+            responseCode = "403", description = "Forbidden - Admin only", content = [Content()]
+        )]
+    )
+    @PostMapping("/games")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createGame(@RequestBody gameDto: GameCreationDTO): GameResponseDTO {
+        return gameService.createGame(gameDto)
     }
 
     @Operation(
