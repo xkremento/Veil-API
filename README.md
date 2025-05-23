@@ -94,7 +94,7 @@ Veil:Tricked is a social deduction game where players participate in matches, an
 
 The API is fully documented using Swagger/OpenAPI. When running the application, you can access the interactive API documentation at:
 ```
-http://localhost:8080/swagger-ui.html
+http://serversipaddress:8080/swagger-ui.html
 ```
 
 This provides a comprehensive view of all available endpoints, their parameters, request/response models, and allows for testing the API directly from the browser.
