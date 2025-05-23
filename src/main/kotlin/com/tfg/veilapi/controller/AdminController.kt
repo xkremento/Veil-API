@@ -1,5 +1,6 @@
 package com.tfg.veilapi.controller
 
+import com.tfg.veilapi.config.ValidationConstants
 import com.tfg.veilapi.dto.AddCoinsDTO
 import com.tfg.veilapi.dto.GameCreationDTO
 import com.tfg.veilapi.dto.GameResponseDTO
@@ -123,10 +124,14 @@ class AdminController(
     )
     @PutMapping("/players/{email}/nickname")
     fun updatePlayerNickname(
-        @PathVariable email: String, @RequestBody @Valid nicknameDto: Map<String, @Valid @Pattern(
-            regexp = "^[a-zA-Z0-9_]+$", message = "Nickname can only contain letters, numbers and underscores"
+        @PathVariable email: String,
+        @RequestBody @Valid nicknameDto: Map<String, @Valid @Pattern(
+            regexp = ValidationConstants.NICKNAME_PATTERN,
+            message = ValidationConstants.NICKNAME_MESSAGE
         ) @Size(
-            min = 3, max = 30, message = "Nickname must be between 3 and 30 characters"
+            min = ValidationConstants.NICKNAME_MIN_LENGTH,
+            max = ValidationConstants.NICKNAME_MAX_LENGTH,
+            message = "Nickname must be between ${ValidationConstants.NICKNAME_MIN_LENGTH} and ${ValidationConstants.NICKNAME_MAX_LENGTH} characters"
         ) String>
     ): PlayerResponseDTO {
         val nickname = nicknameDto["nickname"] ?: throw ResponseStatusException(
