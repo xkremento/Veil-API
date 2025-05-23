@@ -23,7 +23,7 @@ class SecurityConfig(private val jwtRequestFilter: JwtRequestFilter) {
         http.csrf { it.disable() }.authorizeHttpRequests { auth ->
                 auth.requestMatchers("/api/auth/**").permitAll().requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll().requestMatchers("/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN") // New endpoint for administrators
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }.sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)

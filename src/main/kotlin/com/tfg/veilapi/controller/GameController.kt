@@ -1,6 +1,5 @@
 package com.tfg.veilapi.controller
 
-import com.tfg.veilapi.dto.GameCreationDTO
 import com.tfg.veilapi.dto.GameResponseDTO
 import com.tfg.veilapi.service.AuthorizationService
 import com.tfg.veilapi.service.GameService
@@ -23,35 +22,6 @@ import org.springframework.web.server.ResponseStatusException
 class GameController(
     private val gameService: GameService, private val authorizationService: AuthorizationService
 ) {
-
-    @Operation(summary = "Create game", description = "Create a new game with players")
-    @ApiResponses(
-        value = [ApiResponse(
-            responseCode = "201",
-            description = "Game created successfully",
-            content = [Content(schema = Schema(implementation = GameResponseDTO::class))]
-        ), ApiResponse(
-            responseCode = "400",
-            description = "Invalid request - murderer must be one of the players",
-            content = [Content()]
-        ), ApiResponse(
-            responseCode = "404", description = "Player not found", content = [Content()]
-        ), ApiResponse(
-            responseCode = "403", description = "Forbidden - User must be one of the players", content = [Content()]
-        )]
-    )
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    fun createGame(@RequestBody gameDto: GameCreationDTO): GameResponseDTO {
-
-        val currentUserEmail = authorizationService.getCurrentUserEmail()
-        if (!gameDto.playerEmails.contains(currentUserEmail)) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN, "You cannot create a game you are not participating in."
-            )
-        }
-        return gameService.createGame(gameDto)
-    }
 
     @Operation(summary = "Get game", description = "Get details of a specific game")
     @ApiResponses(

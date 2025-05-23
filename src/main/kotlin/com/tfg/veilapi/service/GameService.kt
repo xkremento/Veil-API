@@ -85,8 +85,7 @@ class GameService(
 
         val playerGame =
             playerGameRepository.findByPlayerEmailAndGameId(player.email, gameId) ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Player was not part of this game"
+                HttpStatus.NOT_FOUND, "Player was not part of this game"
             )
 
         return playerGame.role == GameRole.MURDERER
@@ -114,8 +113,7 @@ class GameService(
 
         // Check if player is part of the game
         val playerGame = playerGames.find { it.player.email == playerEmail } ?: throw ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "Player is not part of this game"
+            HttpStatus.BAD_REQUEST, "Player is not part of this game"
         )
 
         // Find current murderer

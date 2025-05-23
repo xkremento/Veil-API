@@ -28,7 +28,6 @@ class JwtTokenUtil {
     fun generateToken(userDetails: UserDetails): String {
         val claims: MutableMap<String, Any> = HashMap()
 
-        // Añadir los roles al token
         val roles = userDetails.authorities.map { it.authority }.toList()
         claims["roles"] = roles
 
