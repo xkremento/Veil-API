@@ -167,26 +167,26 @@ MySQL database with optimized relationships:
 ## Configuration
 
 ### Application Properties
-# Server Configuration
+## Server Configuration
 server.port=8080
 
-# Database Configuration
+## Database Configuration
 spring.datasource.url=jdbc:mysql://[host]:[port]/veildb
 spring.jpa.hibernate.ddl-auto=update
 
-# JWT Configuration
+## JWT Configuration
 jwt.secret=[256-bit-secret]
 jwt.expiration=86400  # 24 hours
 
-# Admin Configuration
+## Admin Configuration
 app.admin.email=admin@veil.com
 app.admin.password=adminPassword
 app.admin.nickname=admin
 
-# Data Loading
+## Data Loading
 app.data.load-sample=true
 
-## Sample Data
+### Sample Data
 
 When `app.data.load-sample=true`, the application loads:
 - Admin user account with full privileges
