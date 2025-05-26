@@ -40,6 +40,11 @@ class FriendService(
         val requester = playerService.findPlayerByEmail(requestDto.requesterId)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
 
+        // Prevent self friend requests
+        if (requester.email == player.email) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot send a friend request to yourself")
+        }
+
         val existingFriendship = friendsRepository.findByPlayerEmailAndFriendEmail(requester.email, player.email)
         if (existingFriendship.isNotEmpty()) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Already friends")

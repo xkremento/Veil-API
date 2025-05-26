@@ -27,6 +27,10 @@ class PlayerService(
             throw ResponseStatusException(HttpStatus.CONFLICT, "Player with this email already exists")
         }
 
+        if (playerRepository.existsByNickname(playerDto.nickname)) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Player with this nickname already exists")
+        }
+
         val player = Player(
             email = playerDto.email,
             nickname = playerDto.nickname,
@@ -89,6 +93,13 @@ class PlayerService(
     fun adminUpdatePlayer(email: String, updateDto: PlayerUpdateDTO): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
 
+        // Check nickname uniqueness if nickname is being updated
+        updateDto.nickname?.let { newNickname ->
+            if (newNickname != player.nickname && playerRepository.existsByNickname(newNickname)) {
+                throw ResponseStatusException(HttpStatus.CONFLICT, "Player with this nickname already exists")
+            }
+        }
+
         val updatedPlayer = player.copy(
             nickname = updateDto.nickname ?: player.nickname,
             password = updateDto.password?.let { passwordEncoder.encode(it) } ?: player.password)
@@ -100,6 +111,10 @@ class PlayerService(
     @Transactional
     fun adminUpdateNickname(email: String, nickname: String): PlayerResponseDTO {
         val player = findPlayerByEmail(email)
+
+        if (playerRepository.existsByNickname(nickname)) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Player with this nickname already exists")
+        }
 
         val updatedPlayer = player.copy(
             nickname = nickname

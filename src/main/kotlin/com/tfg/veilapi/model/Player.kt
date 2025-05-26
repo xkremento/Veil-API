@@ -10,6 +10,11 @@ import lombok.EqualsAndHashCode
     exclude = ["friends", "sentFriendRequests", "receivedFriendRequests", "playerGames", "roles"]
 )
 @Entity
+@Table(
+    indexes = [
+        Index(name = "idx_player_nickname", columnList = "nickname")
+    ]
+)
 data class Player(
     @Id @Email @Column(length = 254, unique = true) @EqualsAndHashCode.Include val email: String = "",
 
