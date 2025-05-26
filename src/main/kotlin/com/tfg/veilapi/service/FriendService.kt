@@ -19,7 +19,8 @@ import java.time.format.DateTimeFormatter
 class FriendService(
     private val friendRequestRepository: FriendRequestRepository,
     private val friendsRepository: FriendsRepository,
-    private val playerService: PlayerService
+    private val playerService: PlayerService,
+    private val authorizationService: AuthorizationService
 ) {
 
     fun getFriendRequestById(requestId: Long): FriendRequestDTO {
@@ -37,7 +38,9 @@ class FriendService(
 
     @Transactional
     fun sendFriendRequest(requestDto: CreateFriendRequestDTO): Long {
-        val requester = playerService.findPlayerByEmail(requestDto.requesterId)
+        // Get the authenticated user as the requester
+        val requesterEmail = authorizationService.getCurrentUserEmail()
+        val requester = playerService.findPlayerByEmail(requesterEmail)
         val player = playerService.findPlayerByEmail(requestDto.playerId)
 
         // Prevent self friend requests

@@ -39,10 +39,9 @@ class FriendController(
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
     fun sendFriendRequest(@RequestBody requestDto: CreateFriendRequestDTO): Map<String, Long> {
-        val currentUserEmail = authorizationService.getCurrentUserEmail()
 
         val updatedRequestDto = CreateFriendRequestDTO(
-            requesterId = currentUserEmail, playerId = requestDto.playerId
+            playerId = requestDto.playerId
         )
         val requestId = friendService.sendFriendRequest(updatedRequestDto)
         return mapOf("requestId" to requestId)
