@@ -87,7 +87,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password123"),
                 coins = 150,
                 skinUrl = "https://example.com/skins/chocolate.png",
-                profileImageUrl = "https://example.com/profiles/paquito.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/f/fd/Copper_Ore_JE2_BE2.png/revision/latest?cb=20210610152415"
             )
 
             val player2 = Player(
@@ -96,7 +96,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password456"),
                 coins = 250,
                 skinUrl = "https://example.com/skins/cabeza.png",
-                profileImageUrl = "https://example.com/profiles/manolo.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/c/c8/Block_of_Diamond_JE5_BE3.png/revision/latest?cb=20200226013851"
             )
 
             val player3 = Player(
@@ -105,7 +105,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password789"),
                 coins = 300,
                 skinUrl = "https://example.com/skins/grillo.png",
-                profileImageUrl = "https://example.com/profiles/pepito.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/5/55/Block_of_Lapis_Lazuli_JE3_BE3.png/revision/latest?cb=20200315192953"
             )
 
             val player4 = Player(
@@ -114,7 +114,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password321"),
                 coins = 120,
                 skinUrl = "https://example.com/skins/alimaña.png",
-                profileImageUrl = "https://example.com/profiles/juanito.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/31/Block_of_Netherite_JE1_BE1.png/revision/latest?cb=20200320021504"
             )
 
             val player5 = Player(
@@ -123,7 +123,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password654"),
                 coins = 450,
                 skinUrl = "https://example.com/skins/gamer.png",
-                profileImageUrl = "https://example.com/profiles/lolito.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/7/72/Block_of_Gold_JE6_BE3.png/revision/latest?cb=20200226013525"
             )
 
             val player6 = Player(
@@ -132,7 +132,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password987"),
                 coins = 200,
                 skinUrl = "https://example.com/skins/choni.png",
-                profileImageUrl = "https://example.com/profiles/carmela.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/7/7e/Block_of_Iron_JE4_BE3.png/revision/latest?cb=20200226013546"
             )
 
             val player7 = Player(
@@ -141,7 +141,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password741"),
                 coins = 180,
                 skinUrl = "https://example.com/skins/politico.png",
-                profileImageUrl = "https://example.com/profiles/mariano.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/0/0b/Block_of_Emerald_JE4_BE3.png/revision/latest?cb=20200226013452"
             )
 
             val player8 = Player(
@@ -150,7 +150,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password852"),
                 coins = 350,
                 skinUrl = "https://example.com/skins/toro.png",
-                profileImageUrl = "https://example.com/profiles/fede.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/1/1f/Block_of_Quartz_JE4_BE2.png/revision/latest?cb=20200226013559"
             )
 
             val player9 = Player(
@@ -159,7 +159,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password963"),
                 coins = 275,
                 skinUrl = "https://example.com/skins/actress.png",
-                profileImageUrl = "https://example.com/profiles/concha.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/4/48/Deepslate_Iron_Ore_JE2_BE1.png/revision/latest?cb=20210326000321"
             )
 
             val player10 = Player(
@@ -168,7 +168,7 @@ class DataInitializer(
                 password = passwordEncoder.encode("password159"),
                 coins = 95,
                 skinUrl = "https://example.com/skins/fiesta.png",
-                profileImageUrl = "https://example.com/profiles/trini.png"
+                profileImageUrl = "https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/ea/Lapis_Lazuli_Ore_JE4_BE4.png/revision/latest?cb=20210414171130"
             )
 
             // Add USER role to all players
